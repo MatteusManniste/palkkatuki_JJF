@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useLocation } from 'react-router-dom'; // Import Link and useLocation
+import { Link, useLocation } from 'react-router-dom';
 import Sisalto from './Sisalto';
 
 const runkoStyle = {
@@ -15,10 +15,9 @@ const runkoStyle = {
 
 const Runko = () => {
   const [runkos, setRunkos] = useState([]);
-  const location = useLocation(); // Get the current location
+  const location = useLocation();
 
   useEffect(() => {
-    // Fetch runkos from your Express.js API endpoint
     axios.get('http://localhost:3001/api/runko')
       .then((response) => {
         setRunkos(response.data);

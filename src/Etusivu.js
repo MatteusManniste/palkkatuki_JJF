@@ -1,5 +1,5 @@
 import React from 'react';
-import Runko from './Runko'; // Import the Runko component
+import Runko from './Runko';
 
 const Etusivu = () => {
   return (
@@ -17,7 +17,7 @@ const Etusivu = () => {
           alignItems: 'center',
         }}
       >
-        <Runko /> {/* Render the Runko component */}
+        <Runko />
       </div>
     </div>
   );
