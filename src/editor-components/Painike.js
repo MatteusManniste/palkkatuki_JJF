@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import '../css/Painike.css'
 
-// Funktio Painikkeen luomiseksi
 const createPainike = async (sisaltoId, nimi, destinationId) => {
   try {
     const response = await axios.post('http://localhost:3001/api/create-painike', {
@@ -21,7 +23,6 @@ const createPainike = async (sisaltoId, nimi, destinationId) => {
   }
 };
 
-// Funktio Painikkeen muokkaamiseksi
 const editPainike = async (painikeId, nimi, destinationId) => {
   try {
     const response = await axios.put(`http://localhost:3001/api/edit-painike/${painikeId}`, {
@@ -41,7 +42,6 @@ const editPainike = async (painikeId, nimi, destinationId) => {
 };
 
 const Painike = ({ otsikkoId, onPainikeUpdated }) => {
-  // Tilamuuttujat
   const [nimi, setNimi] = useState('');
   const [destinationId, setDestinationId] = useState('');
   const [sisaltoOptions, setSisaltoOptions] = useState([]);
@@ -51,7 +51,6 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   const [runkoNameMapping, setRunkoNameMapping] = useState({});
   const [updatedPainike, setUpdatedPainike] = useState(null);
 
-  // Haetaan sisältövaihtoehdot
   const fetchSisaltoOptions = async () => {
     try {
       const response = await axios.get('http://localhost:3001/api/get-sisalto-options');
@@ -59,7 +58,6 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
 
       console.log('Sisältövaihtoehdot haettu:', sisaltoOptionsData);
 
-      // Ryhmitellään sisältövaihtoehdot runko_id:n mukaan
       const groupedOptions = {};
       sisaltoOptionsData.forEach((sisaltoOption) => {
         if (!groupedOptions[sisaltoOption.runko_id]) {
@@ -70,7 +68,6 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
 
       setGroupedSisaltoOptions(groupedOptions);
 
-      // Luodaan kartta runko_id:n ja runko_nimen välillä
       const updatedRunkoNameMapping = {};
       sisaltoOptionsData.forEach((sisaltoOption) => {
         updatedRunkoNameMapping[sisaltoOption.runko_id] = sisaltoOption.runko_nimi;
@@ -82,7 +79,6 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
     }
   };
 
-  // Haetaan olemassa olevat Painikkeet
   const fetchExistingPainikes = async () => {
     try {
       const response = await axios.get(`http://localhost:3001/api/painike/${otsikkoId}`);
@@ -96,13 +92,11 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
     }
   };
 
-  // Effekti, joka suoritetaan komponentin latauksen yhteydessä
   useEffect(() => {
     fetchExistingPainikes();
     fetchSisaltoOptions();
   }, []);
 
-  // Käsittelijä Painikkeen luomiselle tai muokkaukselle
   const handleButtonClick = async () => {
     try {
       if (createdPainikes.length >= 4) {
@@ -111,24 +105,21 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
       }
 
       if (selectedPainikeId) {
-        // Jos Painike on valittu muokkaukseen, kutsutaan editPainike-funktiota
         const updatedPainike = await editPainike(selectedPainikeId, nimi, destinationId);
         console.log('Päivitetty Painike:', updatedPainike);
 
         console.log('Vastaus palvelimelta muokkauksen jälkeen:', updatedPainike);
         console.log('Nykyinen tila ennen päivitystä:', createdPainikes);
 
-        // Päivitetään tila muokatulla Painikkeella
         const updatedPainikesArray = createdPainikes.map((painike) =>
           painike.id === selectedPainikeId ? updatedPainike : painike
         );
 
         setCreatedPainikes(updatedPainikesArray);
-        setSelectedPainikeId(null); // Nollataan valittu Painike
+        setSelectedPainikeId(null);
 
         console.log('Nykyinen tila päivityksen jälkeen:', createdPainikes);
       } else {
-        // Muussa tapauksessa luodaan uusi Painike
         const newPainike = await createPainike(otsikkoId, nimi, destinationId);
         setCreatedPainikes([...createdPainikes, newPainike]);
       }
@@ -141,9 +132,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
     }
   };
 
-  // Käsittelijä muokkauspainikkeen klikkaukselle
   const handleEditClick = (painikeId) => {
-    // Asetetaan valittu Painike muokkaukseen
     const selectedPainike = createdPainikes.find((painike) => painike.id === painikeId);
     if (selectedPainike) {
       setNimi(selectedPainike.nimi);
@@ -152,16 +141,12 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
     }
   };
 
-  // Tarkistetaan onko Painikkeiden enimmäismäärä saavutettu
   const isButtonLimitReached = createdPainikes.length >= 4;
 
-  // Käsittelijä Painikkeen poistamiselle
   const handleDeleteClick = async (painikeId) => {
     try {
-      // Lähetetään HTTP DELETE -pyyntö palvelimelle Painikkeen poistamiseksi
       await axios.delete(`http://localhost:3001/api/delete-painike/${painikeId}`);
 
-      // Onnistuneen poiston jälkeen päivitetään tila poistetulla Painikkeella
       const updatedPainikesArray = createdPainikes.filter((painike) => painike.id !== painikeId);
       setCreatedPainikes(updatedPainikesArray);
 
@@ -176,7 +161,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   return (
     <div>
       {isButtonLimitReached ? (
-        <p>Painikkeiden enimmäismäärä saavutettu (4/4). Syötekentät ovat piilotettu.</p>
+        <p>Painikkeiden enimmäismäärä saavutettu (10/10). Syötekentät ovat piilotettu.</p>
       ) : (
         <>
           <input
@@ -192,7 +177,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
           >
             <option value="">Valitse kohde</option>
             {Object.keys(groupedSisaltoOptions).map((runkoId) => (
-              <optgroup key={runkoId} label={`Runko: ${runkoNameMapping[runkoId]}`}>
+              <optgroup key={runkoId} label={`${runkoNameMapping[runkoId]}`}>
                 {groupedSisaltoOptions[runkoId].map((sisaltoOption) => (
                   <option key={sisaltoOption.id} value={sisaltoOption.id}>
                     {sisaltoOption.otsikko}
@@ -202,17 +187,28 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
             ))}
           </select>
 
-          <button onClick={handleButtonClick}>
-            {selectedPainikeId ? 'Muokkaa Painiketta' : 'Luo Painike'}
+          <button className="button" onClick={handleButtonClick}>
+      {selectedPainikeId ? 'Muokkaa Painiketta' : 'Luo Painike'}
           </button>
         </>
       )}
 
       {createdPainikes.map((painike) => (
         <div key={painike.id}>
-          <button onClick={() => handleEditClick(painike.id)}>Muokkaa</button>
-          <button>{painike.nimi || 'Nimi puuttuu'}</button>
-          <button onClick={() => handleDeleteClick(painike.id)}>Poista</button>
+          <span
+className="button-icon"
+onClick={() => handleEditClick(painike.id)}
+>
+<button className="button">{painike.nimi || 'Nimi puuttuu'}</button>
+<FontAwesomeIcon icon={faEdit} />
+</span>
+
+          <span
+className="button-icon"
+onClick={() => handleDeleteClick(painike.id)}
+>
+<FontAwesomeIcon icon={faTrash} />
+</span>
         </div>
       ))}
     </div>
@@ -220,3 +216,4 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
 };
 
 export default Painike;
+

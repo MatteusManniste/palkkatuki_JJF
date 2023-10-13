@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import './css/Sisalto.css';
 
 const Sisalto = ({ runkoId }) => {
   const [sisalto, setSisalto] = useState([]);
   const location = useLocation();
 
   useEffect(() => {
-    // Haetaan sisalto annetulle runkoId:lle
     axios.get(`http://localhost:3001/api/sisalto/runko/${runkoId}`)
       .then((response) => {
         console.log('API-vastaus:', response.data);
@@ -20,25 +22,31 @@ const Sisalto = ({ runkoId }) => {
 
   return (
     <div className="sisalto-container">
-      <ul className="sisalto-lista">
+      <div className="sisalto-links">
         {sisalto.map((item) => (
-          <li className="sisalto-kohta" key={item.id}>
-            {/* Käytä item.id kohdesivun ID:ksi */}
+          location.pathname.includes('hallintapaneeli') ? (
+            <div className="sisalto-link disabled" key={item.id}>
+              <h3>{item.otsikko}</h3>
+              <span className="arrow-icon">
+                <FontAwesomeIcon icon={faArrowRight} />
+              </span>
+            </div>
+          ) : (
             <Link
-              to={
-                location.pathname.includes('hallintapaneeli')
-                  ? `/sivueditor/${encodeURIComponent(item.id)}`
-                  : `/sivu/${encodeURIComponent(item.id)}`
-              }
+              to={`/sivu/${encodeURIComponent(item.id)}`}
+              className="sisalto-link"
+              key={item.id}
             >
-              {item.otsikko}
+              <h3>{item.otsikko}</h3>
+              <span className="arrow-icon">
+                <FontAwesomeIcon icon={faArrowRight} />
+              </span>
             </Link>
-          </li>
+          )
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
 
 export default Sisalto;
-

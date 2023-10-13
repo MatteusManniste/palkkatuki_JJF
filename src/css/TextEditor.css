@@ -1,0 +1,25 @@
+.log-button {
+    background-color: #A5CE3A;
+    color: #FFF;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 5px;
+  }
+  
+  .ql-size-small {
+    font-size: 12px;
+  }
+  
+  .ql-size-normal {
+    font-size: 16px;
+  }
+  
+  .ql-size-large {
+    font-size: 20px;
+  }
+  
+  .ql-size-huge {
+    font-size: 24px;
+  }

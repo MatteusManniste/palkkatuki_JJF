@@ -1,40 +1,18 @@
-/* Editor.css */
+.centered-content {
+    text-align: center;
+  }
 
-.editor {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
+.save-button {
+    margin-left: 5px;
+    background-color: #A5CE3A;
+    color: #FFF;
+    padding: 4px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; 
+    transition: background-color 0.3s; 
   }
   
-  .box1 {
-    flex: 1;
-    height: 60vh;
-    background-color: lightgreen;
-    margin: 0 20px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
+.save-button:hover {
+    background-color: #85AB29; 
   }
-  
-  .title-count {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 16px;
-    color: gray;
-  }
-  
-  .box2 {
-    flex: 1;
-    height: 60vh;
-    background-color: lightgreen;
-    margin: 0 20px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  

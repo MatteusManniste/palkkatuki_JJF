@@ -5,24 +5,46 @@ import Etusivu from './Etusivu';
 import Editor from './Editor';
 import Sivu from './Sivu';
 import SivuEditor from './SivuEditor';
+import './css/App.css';
+import logo from './css/logo.png';
+import Apua from './Apua';
 
 function App() {
   return (
-    <Router>
-          <li>
-            <NavLink to="/">Etusivu</NavLink>
-          </li>
-          <li>
-            <NavLink to="/hallintapaneeli">Hallintapaneeli</NavLink>
-          </li>
-      <Routes>
-          <Route path="/hallintapaneeli" element={<Hallintapaneeli />} />
-          <Route path="/" element={<Etusivu />} />
-          <Route path="/editor" element={<Editor />} />
-          <Route path="/sivu/:otsikko" element={<Sivu />} />
-          <Route path="/sivueditor/:id" element={<SivuEditor />} />
-      </Routes>
-    </Router>
+    <div className="app-container">
+      <Router>
+        <div className="container-header">
+          <div className="logo-nav">
+            <img src={logo} alt="Logo" className="logo" />
+            </div>
+            <Apua />
+
+        </div>
+
+        <div className="container-content">
+          <Routes>
+            <Route path="/hallintapaneeli" element={<Hallintapaneeli />} />
+            <Route path="/" element={<Etusivu />} />
+            <Route path="/editor" element={<Editor />} />
+            <Route path="/sivu/:otsikko" element={<Sivu />} />
+            <Route path="/sivueditor/:id" element={<SivuEditor />} />
+          </Routes>
+        </div>
+
+        <div className="container-footer">
+        <nav>
+              <ul>
+                <li>
+                  <NavLink to="/">Etusivu</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/hallintapaneeli">Hallintapaneeli</NavLink>
+                </li>
+              </ul>
+            </nav>
+        </div>
+      </Router>
+    </div>
   );
 }
 

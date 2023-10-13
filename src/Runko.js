@@ -2,23 +2,16 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
 import Sisalto from './Sisalto';
-
-const runkoStyle = {
-  backgroundColor: 'yellow',
-  padding: '10px',
-  margin: '10px',
-  boxShadow: '2px 2px 5px rgba(0, 0, 0, 0.2)',
-  borderRadius: '5px',
-  width: '300px',
-  position: 'relative',
-};
+import Laskuri from './Laskuri';
+import './css/Runko.css';
 
 const Runko = () => {
   const [runkos, setRunkos] = useState([]);
   const location = useLocation();
 
   useEffect(() => {
-    axios.get('http://localhost:3001/api/runko')
+    axios
+      .get('http://localhost:3001/api/runko')
       .then((response) => {
         setRunkos(response.data);
       })
@@ -28,18 +21,22 @@ const Runko = () => {
   }, []);
 
   return (
-    <div>
-     {runkos.map((runko) => (
-      <div key={runko.id} style={runkoStyle}>
-        <h2>{runko.nimike}</h2>
-        {location.pathname.includes('hallintapaneeli') && (
-          <Link to={`/sivueditor/${encodeURIComponent(runko.id)}`}>
-            Sivueditor
-          </Link>
-        )}
-        <Sisalto runkoId={runko.id} />
+    <div className="runko-container">
+      {runkos.map((runko) => (
+        <div key={runko.id} className="runko-box">
+          <h1>{runko.nimike}</h1>
+          {location.pathname.includes('hallintapaneeli') && (
+            <Link to={`/sivueditor/${encodeURIComponent(runko.id)}`}>
+              Muokkaa
+            </Link>
+          )}
+          <Sisalto runkoId={runko.id} />
+        </div>
+      ))}
+
+      <div className="laskuri-box">
+        <Laskuri />
       </div>
-    ))}
     </div>
   );
 };
