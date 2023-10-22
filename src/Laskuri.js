@@ -60,25 +60,26 @@ const Laskuri = () => {
       const query = `SELECT * FROM matrix WHERE ${conditions.join(" AND ")}`;
   
       axios
-      .post('http://localhost:3001/api/matrix/query', { sql: query })
-      .then((response) => {
-        const resultData = response.data;
-    
-        const filteredResult = {};
-        for (const key in resultData[0]) {
-          if (key.startsWith('vastaus_')) {
-            filteredResult[key] = resultData[0][key];
+        .post('http://localhost:3001/api/matrix/query', { sql: query })
+        .then((response) => {
+          const resultData = response.data;
+
+          const filteredResult = {};
+          for (const key in resultData[0]) {
+            if (key.startsWith('vastaus_')) {
+              filteredResult[key] = resultData[0][key];
+            }
           }
-        }
-    
-        setResult(filteredResult);
-        console.log("Response from server:", resultData);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+  
+          setResult(filteredResult);
+          console.log("Response from server:", resultData);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
     }
   };
+  
 
   useEffect(() => {
     const allAnswered = areAllQuestionsAnswered();
@@ -90,18 +91,16 @@ const Laskuri = () => {
   }, [selectedAnswers, questions]);
 
   const fetchAndLogVastausData = () => {
-    // Fetch data from the "Vastaus" API endpoint
     axios.get('http://localhost:3001/api/vastaus')
       .then((response) => {
-        // Log the response in the console
         console.log('Response from "Vastaus" API:', response.data);
-         // Set the fetched data to the state
         setVastausData(response.data);
       })
       .catch((error) => {
         console.error('Error fetching data from "Vastaus" API:', error);
       });
   };
+  
   
   
 
@@ -113,7 +112,7 @@ const Laskuri = () => {
     acc[item.id] = item.text;
     return acc;
   }, {});
-  
+
   return (
 <div className="runko-container">
   <div className="runko-box">

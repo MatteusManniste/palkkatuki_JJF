@@ -15,218 +15,99 @@ db.connect((err) => {
   }
   console.log('Yhdistetty MySQL-tietokantaan');
 });
-// Luo uusi Excel-työkirja
-const workbook = new ExcelJS.Workbook();
 
-try {
-  // Lue Excel-tiedosto
-  workbook.xlsx.readFile('matrix.xlsx').then(async () => {
-    // Hae taulukon toinen työlehti
-    const worksheet = workbook.getWorksheet(2);
-    const questions = [];
-    const types = [];
-    const newEntries = [];
-    let firstRow;
-
-    // Käy läpi ensimmäinen rivi ja hae kysymykset ja tyypit
-    worksheet.getRow(1).eachCell((cell) => {
-      const question = cell.value;
-      questions.push(question);
-      types.push(question.endsWith("?") ? "Kysymys" : "Vastaus");
-      firstRow = firstRow || worksheet.getRow(1);
-    });
-
-    // SQL-lause taulukon tyhjentämiseksi
-    const truncateTableQuery = 'TRUNCATE TABLE matrix';
-
-    // Tyhjennä taulukko ja lisää uudet tiedot
-    db.query(truncateTableQuery, (truncateError) => {
-      if (truncateError) {
-        console.error('Virhe taulukon tyhjentämisessä:', truncateError);
+async function dropMatrixTable() {
+  const dropTableQuery = 'DROP TABLE matrix';
+  return new Promise((resolve) => {
+    db.query(dropTableQuery, (dropTableError) => {
+      if (dropTableError) {
+        console.error('Virhe taulukon poistossa:', dropTableError);
+        resolve(false);
       } else {
-        console.log('Taulukko tyhjennetty. Lisätään uudet tiedot...');
-
-        for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex++) {
-          const currentRow = worksheet.getRow(rowIndex);
-
-          const values = [];
-          for (let i = 1; i <= firstRow.actualCellCount; i++) {
-            const cellValue = currentRow.getCell(i).value;
-
-            const valueToInsert = typeof cellValue === 'number' ? cellValue.toString() : cellValue;
-
-            values.push(valueToInsert);
-          }
-
-          if (!values.some((value) => value !== null && value !== '')) {
-            console.log(`Rivi ${rowIndex} on tyhjä tai siinä ei ole tietoja. Ohitetaan...`);
-            continue;
-          }
-
-          // Luo sarakkeiden nimet
-          const columnNames = questions
-            .map((_, index) => {
-              const prefix = types[index] === 'Kysymys' ? 'kysymys' : 'vastaus';
-              return `${prefix}_${index + 1}`;
-            })
-            .join(', ');
-
-          // Luo paikat uusille tiedoille
-          const placeholders = new Array(firstRow.actualCellCount).fill('?').join(', ');
-          const insertDataQuery = `INSERT INTO matrix (${columnNames}) VALUES (${placeholders})`;
-
-          // Lisää tiedot taulukkoon
-          db.query(insertDataQuery, values, (insertDataError) => {
-            if (insertDataError) {
-              console.error(`Virhe rivin ${rowIndex} tietojen lisäämisessä:`, insertDataError);
-            } else {
-              // Tietojen lisääminen onnistui
-            }
-          });
-        }
+        console.log('Taulukko "matrix" poistettu');
+        resolve(true);
       }
     });
-
-    // Lisää uudet kysymykset ja sarakkeet
-    async function insertQuestionAndColumn(question, type, index) {
-      return new Promise(async (resolve) => {
-        const questionToInsert = question;
-        db.query('SELECT id FROM questions WHERE text = ?', [questionToInsert], async (selectError, selectResults) => {
-          if (selectError) {
-            console.error('Virhe tarkistaessa mahdollisia päällekkäisiä:', selectError);
-            resolve(false);
-          } else {
-            if (selectResults.length === 0) {
-              const insertQuery = 'INSERT INTO questions (text, type) VALUES (?, ?)';
-              const questionType = type;
-
-              db.query(insertQuery, [question, questionType], async (insertError, insertResults) => {
-                if (insertError) {
-                  console.error('Virhe kysymyksen lisäämisessä:', insertError);
-                  resolve(false);
-                } else {
-                  const insertedId = insertResults.insertId;
-
-                  const prefix = questionType === 'Kysymys' ? 'kysymys' : 'vastaus';
-                  const columnName = `${prefix}_${insertedId}`;
-                  const columnExists = await checkIfColumnExists(columnName);
-
-                  if (!columnExists) {
-                    const createMatrixColumnQuery = `ALTER TABLE matrix ADD COLUMN ${columnName} VARCHAR(255)`;
-                    db.query(createMatrixColumnQuery, async (createColumnError) => {
-                      if (createColumnError) {
-                        console.error('Virhe matriisin sarakkeen luomisessa:', createColumnError);
-                        resolve(false);
-                      } else {
-                        newEntries.push(insertedId);
-                        console.log(`Matriisin sarake luotu: ${columnName}`);
-                        resolve(true);
-                      }
-                    });
-                  } else {
-                    resolve(true);
-                  }
-                }
-              });
-            } else {
-              resolve(false);
-            }
-          }
-        });
-      });
-    }
-
-    // Tarkista, onko sarake olemassa
-    async function checkIfColumnExists(columnName) {
-      return new Promise((resolve) => {
-        const checkColumnQuery = `SELECT * FROM information_schema.columns WHERE table_name = 'matrix' AND column_name = ?`;
-        db.query(checkColumnQuery, [columnName], (checkColumnError, checkColumnResults) => {
-          if (checkColumnError) {
-            console.error('Virhe tarkistaessa, onko sarake olemassa:', checkColumnError);
-            resolve(false);
-          } else {
-            resolve(checkColumnResults.length > 0);
-          }
-        });
-      });
-    }
-
-    // Lisää uudet kysymykset ja sarakkeet
-    await Promise.all(
-      questions.map(async (column, index) => {
-        const isNewEntry = await insertQuestionAndColumn(column, types[index], index);
-      })
-    );
-
-    if (newEntries.length > 0) {
-      console.log('Uusi merkintä:', newEntries.map((id) => `${types[id - 1]}_${id}`).join(', '));
-    }
-    if (questions.length === 0) {
-      console.log('Ei uusia merkintöjä.');
-    }
   });
-} catch (error) {
-  console.error('Virhe:', error);
 }
 
-try {
-  // SQL-lause taulukon "answers" tyhjentämiseksi
-  const truncateAnswersQuery = 'TRUNCATE TABLE answers';
-
-  // Tyhjennä "answers" taulukko ja lisää uudet tiedot
-  db.query(truncateAnswersQuery, (truncateError) => {
-    if (truncateError) {
-      console.error('Virhe "answers" taulukon tyhjentämisessä:', truncateError);
-    } else {
-      console.log('Answers-taulukko tyhjennetty. Lisätään uudet tiedot...');
-
-      // Lue Excel-tiedosto
-      workbook.xlsx.readFile('matrix.xlsx')
-        .then(async () => {
-          // Hae taulukon ensimmäinen työlehti
-        })
-        .catch((error) => {
-          console.error('Virhe Excel-tiedoston lukemisessa:', error);
-        });
-    }
+async function recreateMatrixTable() {
+  const recreateTableQuery = 'CREATE TABLE matrix (id INT AUTO_INCREMENT PRIMARY KEY)';
+  return new Promise((resolve) => {
+    db.query(recreateTableQuery, (recreateTableError) => {
+      if (recreateTableError) {
+        console.error('Virhe taulukon luomisessa:', recreateTableError);
+        resolve(false);
+      } else {
+        console.log('Taulukko "matrix" uudelleenluotu');
+        resolve(true);
+      }
+    });
   });
-} catch (error) {
-  console.error('Tapahtui virhe:', error);
 }
 
-try {
-  // Lue Excel-tiedosto
-  workbook.xlsx.readFile('matrix.xlsx')
-    .then(async () => {
-      const worksheet = workbook.getWorksheet(1);
+async function truncateAnswersTable() {
+  try {
+    const truncateAnswersQuery = 'TRUNCATE TABLE answers';
+    await new Promise((resolve) => {
+      db.query(truncateAnswersQuery, (truncateError) => {
+        if (truncateError) {
+          console.error('Virhe "answers" taulukon tyhjentämisessä:', truncateError);
+          resolve(false);
+        } else {
+          console.log('Answers-taulukko tyhjennetty.');
+          resolve(true);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Tapahtui virhe:', error);
+  }
+}
 
-      const questions = [];
-      const types = [];
+async function truncateQuestionsTable() {
+  try {
+    const truncateQuestionsQuery = 'TRUNCATE TABLE questions';
+    await new Promise((resolve) => {
+      db.query(truncateQuestionsQuery, (truncateError) => {
+        if (truncateError) {
+          console.error('Virhe "questions" taulukon tyhjentämisessä:', truncateError);
+          resolve(false);
+        } else {
+          console.log('Questions-taulukko tyhjennetty.');
+          resolve(true);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Tapahtui virhe:', error);
+  }
+}
 
-      // Käy läpi työarkin sarakkeet
-      for (let columnIndex = 1; columnIndex <= worksheet.actualColumnCount; columnIndex++) {
-        const question = worksheet.getRow(1).getCell(columnIndex).value;
-        questions.push(question);
+async function insertQuestionsAndAnswersIntoQuestionsTable(questions, answers) {
+  try {
+    const values = [
+      ...questions.map((question) => [null, question, "Kysymys"]),
+      ...answers.map((answer) => [null, answer, "Vastaus"]),
+    ];
 
-        // Lisää kysymys ja sarakkeet tietokantaan
-        insertQuestionAndColumn(question, 'Kysymys', columnIndex - 1);
+    const insertQuery = 'INSERT INTO questions (id, text, type) VALUES ?';
 
-        worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-          if (rowNumber === 1) return;
-
-          const optionText = row.getCell(columnIndex).value;
-
-          // Lisää vastausvaihtoehto tietokantaan
-          insertAnswerOption(optionText, columnIndex - 1, rowNumber - 2);
-        });
-      }
-
-      // Lisää kysymys ja sarakkeet tietokantaan
-      async function insertQuestionAndColumn(question, type, index) {
-        // Tarkista, onko kysymys jo olemassa ja lisää tarvittaessa
-      }
-
-      // Lisää vastausvaihtoehto tietokantaan
+    await new Promise((resolve) => {
+      db.query(insertQuery, [values], (insertError) => {
+        if (insertError) {
+          console.error('Error inserting questions and answers into questions table:', insertError);
+          resolve(false);
+        } else {
+          console.log('Questions and answers inserted into questions table');
+          resolve(true);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error inserting questions and answers into questions table:', error);
+  }
+}
       async function insertAnswerOption(optionText, questionIndex, optionIndex) {
         if (optionText !== null && optionText !== '') {
           const insertAnswerQuery = 'INSERT INTO answers (option_text, question_id) VALUES (?, ?)';
@@ -241,13 +122,156 @@ try {
           console.warn(`Ohitettiin NULL- tai tyhjän vastausvaihtoehdon lisääminen kysymykselle ${questionIndex + 1}, vaihtoehto ${optionIndex}`);
         }
       }
-    })
-    .catch((error) => {
-      console.error('Virhe Excel-tiedoston lukemisessa:', error);
-    });
-} catch (error) {
-  console.error('Tapahtui virhe:', error);
+
+async function fetchAndInsertQuestionsAndAnswersFromExcel() {
+  try {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile('matrix.xlsx');
+    const worksheet = workbook.getWorksheet(1);
+
+    for (let columnIndex = 1; columnIndex <= worksheet.actualColumnCount; columnIndex++) {
+      worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+        if (rowNumber === 1) return;
+        const optionText = row.getCell(columnIndex).value;
+
+        insertAnswerOption(optionText, columnIndex - 1, rowNumber - 2);
+      });
+    }
+
+    console.log('Answers inserted into the database');
+  } catch (error) {
+    console.error('Error fetching and inserting answers from Excel:', error);
+  }
 }
+
+async function createMatrixColumns(questions, answers) {
+  const newEntries = [];
+  let questionIndex = 0;
+  let answerIndex = questions.length;
+
+  for (let index = 0; index < questions.length + answers.length; index++) {
+    let columnName;
+
+    if (index < questions.length) {
+      columnName = `kysymys_${++questionIndex}`;
+    } else {
+      columnName = `vastaus_${++answerIndex}`;
+    }
+
+    const createMatrixColumnQuery = `ALTER TABLE matrix ADD COLUMN ${columnName} VARCHAR(255)`;
+
+    await new Promise((resolve) => {
+      db.query(createMatrixColumnQuery, async (createColumnError) => {
+        if (createColumnError) {
+          console.error('Error creating matrix column:', createColumnError);
+          resolve(false);
+        } else {
+          newEntries.push(columnName);
+          console.log(`Matrix column created: ${columnName}`);
+          resolve(true);
+        }
+      });
+    });
+  }
+
+  return newEntries;
+}
+
+
+
+
+
+
+async function insertMatrixDataFromExcel(questions, answers) {
+  try {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile('matrix.xlsx');
+    const worksheet = workbook.getWorksheet(2);
+
+    const insertPromises = [];
+
+    for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex++) {
+      const currentRow = worksheet.getRow(rowIndex);
+      const values = [];
+
+      for (let i = 1; i <= questions.length + answers.length; i++) {
+        const cellValue = currentRow.getCell(i).value;
+        const valueToInsert = cellValue !== null ? cellValue.toString() : null;
+        values.push(valueToInsert || null);
+      }
+
+      if (values.some((value) => value !== null && value !== '')) {
+        // Create column names for insertion
+        const columnNames = [
+          ...questions.map((_, index) => `kysymys_${index + 1}`),
+          ...answers.map((_, index) => `vastaus_${questions.length + index + 1}`) // Start answers after questions
+        ].join(', ');
+
+        // Create placeholders for the values
+        const placeholders = new Array(values.length).fill('?').join(', ');
+        const insertDataQuery = `INSERT INTO matrix (${columnNames}) VALUES (${placeholders})`;
+
+        const insertPromise = new Promise((resolve) => {
+          db.query(insertDataQuery, values, (insertDataError) => {
+            if (insertDataError) {
+              console.error(`Error inserting data for row ${rowIndex}:`, insertDataError);
+              resolve(false);
+            } else {
+              console.log(`Data inserted for row ${rowIndex}`);
+              resolve(true);
+            }
+          });
+        });
+
+        insertPromises.push(insertPromise);
+      }
+    }
+
+    await Promise.all(insertPromises);
+    console.log('Matrix data inserted into the database');
+  } catch (error) {
+    console.error('Error inserting matrix data from Excel:', error);
+  }
+}
+
+async function Mörönheräys() {
+  try {
+    const questions = [];
+    const answers = [];
+    let firstRow;
+    let worksheet;
+    
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile('matrix.xlsx');
+    worksheet = workbook.getWorksheet(2);
+    
+    worksheet.getRow(1).eachCell((cell) => {
+      const question = cell.value;
+      if (question.endsWith("?")) {
+        questions.push(question);
+      } else {
+        answers.push(question);
+      }
+      firstRow = firstRow || worksheet.getRow(1);
+    });
+    
+    await dropMatrixTable();
+    await recreateMatrixTable();
+    await truncateQuestionsTable();
+    await truncateAnswersTable();
+    console.log(questions)
+    console.log(answers)
+    insertQuestionsAndAnswersIntoQuestionsTable(questions, answers);
+    fetchAndInsertQuestionsAndAnswersFromExcel()
+    await createMatrixColumns(questions, answers)
+    insertMatrixDataFromExcel(questions, answers)
+  } catch (error) {
+    console.error('Virhe Mörönheräyksen aikana:', error);
+  }
+}
+
+
+Mörönheräys();
 
 // Kantojen haku
 
