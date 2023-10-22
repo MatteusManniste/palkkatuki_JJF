@@ -3,7 +3,8 @@ import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
 import Sisalto from './Sisalto';
 import './css/Runko.css';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 const Runko = () => {
   const [runkos, setRunkos] = useState([]);
   const location = useLocation();
@@ -33,11 +34,15 @@ const Runko = () => {
         </div>
       ))}
 
-      <div className="laskuri-box">
-      <Link to="/laskuri">
-      <h1>Palkkatuki laskuri</h1>
-      </Link>
-      </div>
+<div className="laskuri-box">
+  <Link to="/laskuri" className="custom-link">
+    <h1>Palkkatukilaskuri
+      <span className="arrow-icon">
+        <FontAwesomeIcon icon={faArrowRight} />
+      </span>
+    </h1>
+  </Link>
+</div>
     </div>
   );
 };

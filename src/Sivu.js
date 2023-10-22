@@ -52,30 +52,29 @@ const Sivu = () => {
 
   return (
     <div>
-      <div>
-        <div className="sivu-content">
-        <div className="breadcrumb-container">
-  <Breadcrumb breadcrumbs={breadcrumbs} />
-</div>
-
-          <h2 style={{ textAlign: 'center' }}>
-            {content && content.otsikko ? content.otsikko : otsikko}
-          </h2>
-          {content ? (
-            <div dangerouslySetInnerHTML={{ __html: content.kentta }} />
-          ) : (
-            <p>Ei saatavilla olevaa sisältöä</p>
-          )}
-          {content && <Painike sisaltoId={content.id} destinationId={content.id} />}
-        </div>
+    <div className="sivu-content">
+      <div className="breadcrumb-container">
+        <Breadcrumb breadcrumbs={breadcrumbs} />
       </div>
-      <div className="home-link-container">
+      <h2 style={{ textAlign: 'center' }}>
+        {content && content.otsikko ? content.otsikko : otsikko}
+      </h2>
+      {content ? (
+        <div dangerouslySetInnerHTML={{ __html: content.kentta }} />
+      ) : (
+        <p>Ei saatavilla olevaa sisältöä</p>
+      )}
+      {content && <Painike sisaltoId={content.id} destinationId={content.id} />}
+    </div>
+    <div className="home-link-container">
         <Link to="/" className="home-link">
           <FontAwesomeIcon icon={faHome} />
         </Link>
       </div>
     </div>
+    
   );
+  
   
   
   

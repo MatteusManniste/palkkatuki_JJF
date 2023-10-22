@@ -1,6 +1,9 @@
 import './css/Runko.css';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
 
 const Laskuri = () => {
   const [questions, setQuestions] = useState([]);
@@ -168,7 +171,13 @@ const Laskuri = () => {
   </div>
 )}
 </div>
+<div className="home-link-container">
+        <Link to="/" className="home-link">
+          <FontAwesomeIcon icon={faHome} />
+        </Link>
+      </div>
     </div>
+    
   );
 };
 

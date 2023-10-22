@@ -21,11 +21,14 @@
   align-items: center;
   text-align: center;
 }
-
+.runko-container {
+  justify-content: center;
+}
 @media screen and (min-width: 880px) {
   .runko-container {
     display: flex;
     flex-wrap: wrap;
+    
   }
 
   .runko-box, .laskuri-box {
@@ -76,4 +79,8 @@
 .result-text {
   font-size: 18px;
   margin: 5px 0;
+}
+.custom-link {
+  text-decoration: none;
+  color: #000;
 }
