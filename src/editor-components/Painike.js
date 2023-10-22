@@ -161,7 +161,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   return (
     <div>
       {isButtonLimitReached ? (
-        <p>Painikkeiden enimmäismäärä saavutettu (10/10). Syötekentät ovat piilotettu.</p>
+        <p>Painikkeiden enimmäismäärä saavutettu (4/4). Syötekentät ovat piilotettu.</p>
       ) : (
         <>
           <input

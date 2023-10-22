@@ -8,6 +8,7 @@ import SivuEditor from './SivuEditor';
 import './css/App.css';
 import logo from './css/logo.png';
 import Apua from './Apua';
+import Laskuri from './Laskuri';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/editor" element={<Editor />} />
             <Route path="/sivu/:otsikko" element={<Sivu />} />
             <Route path="/sivueditor/:id" element={<SivuEditor />} />
+            <Route path="/laskuri" element={<Laskuri />} />
           </Routes>
         </div>
 

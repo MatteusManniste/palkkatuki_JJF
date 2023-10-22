@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useLocation } from 'react-router-dom';
 import Sisalto from './Sisalto';
-import Laskuri from './Laskuri';
 import './css/Runko.css';
 
 const Runko = () => {
@@ -35,7 +34,9 @@ const Runko = () => {
       ))}
 
       <div className="laskuri-box">
-        <Laskuri />
+      <Link to="/laskuri">
+      <h1>Palkkatuki laskuri</h1>
+      </Link>
       </div>
     </div>
   );
