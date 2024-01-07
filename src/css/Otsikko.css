@@ -1,3 +1,65 @@
 .hidden {
     display: none;
 }
+
+.otsikko-view {
+    display: flex;
+    align-items: center;
+  }
+  
+  .otsikko-view h3 {
+    font-size: 1.5rem;
+  }
+  
+  .button-icon {
+    margin-left: 10px;
+    color: #A5CE3A;
+    cursor: pointer;
+  }
+  
+  .otsikko-view .edit-button .fas,
+  .otsikko-view .delete-button .fas {
+    margin-right: 4px;
+  }
+
+.otsikko-submit-button {
+  background-color: #A5CE3A;
+  color: #FFF;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 5px;
+}
+
+.otsikko-submit-button:hover {
+  background-color: #8CAF26;
+}
+
+ul.custom-list {
+  display: inline-block;
+  margin: 0;             
+  padding: 0;            
+  list-style-type: none
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.centered-content {
+  flex: 1;
+  margin-left: 20px;
+}
+@media (max-width: 600px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .custom-list, .centered-content {
+    flex: auto;
+    margin: 0;
+
+  }
+}

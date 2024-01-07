@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Import useHistory
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import '../css/Editor.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit } from '@fortawesome/free-solid-svg-icons';
 
 const NimikeEditor = () => {
-  const { id } = useParams(); // Extract the ID from the route path
+  const { id } = useParams();
   const [titleText, setTitleText] = useState('');
   const [editing, setEditing] = useState(false);
   const [fetchedData, setFetchedData] = useState(null);
-  const navigate = useNavigate(); // Initialize history
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (id) {
@@ -38,13 +40,11 @@ const NimikeEditor = () => {
     const shouldDelete = window.confirm('Are you sure you want to delete this Nimike?');
 
     if (shouldDelete) {
-      // Send a DELETE request to delete the Nimike
       axios
         .delete(`http://localhost:3001/api/delete-title/${id}`)
         .then(() => {
           console.log('Nimike deleted successfully');
-          // Redirect to a different page after deletion
-          navigate('/hallintapaneeli'); // Replace '/' with the desired URL
+          navigate('/hallintapaneeli');
         })
         .catch((error) => {
           console.error('Error deleting Nimike:', error);
@@ -53,29 +53,25 @@ const NimikeEditor = () => {
   };
 
   return (
-    <div>
-      {fetchedData && (
-        <div>
-          <p>Fetched Data:</p>
-          <pre>{JSON.stringify(fetchedData, null, 2)}</pre>
-        </div>
-      )}
-
+    <div className="nimike-editor-container">
       {editing ? (
-        <div>
+        <div className="centered-content">
           <input
             type="text"
             placeholder="Title"
             value={titleText}
             onChange={(e) => setTitleText(e.target.value)}
           />
-          <button onClick={handleTitleSubmit}>Save</button>
+          <button className="save-button" onClick={handleTitleSubmit}>Save</button>
         </div>
       ) : (
-        <div>
-          <p>Title: {titleText}</p>
-          <button onClick={() => setEditing(true)}>Edit Title</button>
-          <button onClick={handleDeleteClick}>Delete</button>
+        <div className="centered-content">
+          <h2>
+            {titleText}
+            <a href="#" onClick={() => setEditing(true)}>
+            <FontAwesomeIcon icon={faEdit} style={{ marginLeft: '10px', color: '#A5CE3A' }} />
+            </a>
+          </h2>
         </div>
       )}
     </div>

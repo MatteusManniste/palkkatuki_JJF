@@ -7,15 +7,15 @@ const PlusIcon = ({ onClick }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh', // Set the component to cover the entire viewport vertically
+        height: '100vh',
       }}
     >
       <div
         style={{
-          fontSize: '4rem', // Adjust the size of the "+" icon
-          cursor: 'pointer', // Make the icon clickable (optional)
+          fontSize: '4rem',
+          cursor: 'pointer',
         }}
-        onClick={onClick} // Attach the click event handler
+        onClick={onClick}
       >
         +
       </div>

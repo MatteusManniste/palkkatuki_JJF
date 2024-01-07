@@ -3,11 +3,9 @@ import { useNavigate } from 'react-router-dom';
 
 const Breadcrumb = ({ breadcrumbs }) => {
   const navigate = useNavigate();
-  // Funktio siirtymiseen tiettyyn polkuun
   const goToBreadcrumb = (path) => {
     navigate(path);
   };
-
 
   return (
     <div className="breadcrumbs">

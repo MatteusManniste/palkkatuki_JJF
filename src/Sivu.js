@@ -3,6 +3,10 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Painike from './Painike';
 import Breadcrumb from './Breadcrumb';
+import './css/Sivu.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
 
 const Sivu = () => {
   const { otsikko } = useParams();
@@ -16,24 +20,21 @@ const Sivu = () => {
         console.log('API-vastaus:', response.data);
         setContent(response.data);
 
-        // Luodaan uusi murupolku-taulukko aiempien murupolkujen perusteella
         setBreadcrumbs((prevBreadcrumbs) => {
           const newBreadcrumbs = [...prevBreadcrumbs];
 
           if (response.data) {
-            // Tarkista, onko murupolku jo olemassa ennen kuin lisätään se
             const breadcrumbExists = newBreadcrumbs.some(
               (breadcrumb) => breadcrumb.label === response.data.otsikko
             );
 
             if (!breadcrumbExists) {
               newBreadcrumbs.push({
-                id: response.data.id, // Uniikki tunniste murupolulle
+                id: response.data.id,
                 label: response.data.otsikko,
                 path: `/sivu/${encodeURIComponent(response.data.id)}`,
               });
             } else {
-              // Jos murupolku on jo olemassa, poista mahdolliset seuraavat murupolut
               const index = newBreadcrumbs.findIndex(
                 (breadcrumb) => breadcrumb.id === response.data.id
               );
@@ -51,22 +52,32 @@ const Sivu = () => {
 
   return (
     <div>
-      {/* Renderöi Murupolku-komponentti ja välitä murupolut propina */}
-      <Breadcrumb breadcrumbs={breadcrumbs} />
-
-      <div className="content">
-        <h2>{otsikko}</h2>
-        {content ? (
-          <div dangerouslySetInnerHTML={{ __html: content.kentta }} />
-        ) : (
-          <p>Ei saatavilla olevaa sisältöä</p>
-        )}
+    <div className="sivu-content">
+      <div className="breadcrumb-container">
+        <Breadcrumb breadcrumbs={breadcrumbs} />
       </div>
-
-      {/* Renderöi Painike-komponentti tässä */}
+      <h2 style={{ textAlign: 'center' }}>
+        {content && content.otsikko ? content.otsikko : otsikko}
+      </h2>
+      {content ? (
+        <div dangerouslySetInnerHTML={{ __html: content.kentta }} />
+      ) : (
+        <p>Ei saatavilla olevaa sisältöä</p>
+      )}
       {content && <Painike sisaltoId={content.id} destinationId={content.id} />}
     </div>
+    <div className="home-link-container">
+        <Link to="/" className="home-link">
+          <FontAwesomeIcon icon={faHome} />
+        </Link>
+      </div>
+    </div>
+    
   );
+  
+  
+  
+  
 };
 
 export default Sivu;

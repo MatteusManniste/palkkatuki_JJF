@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import '../css/Painike.css'
 
 const createPainike = async (sisaltoId, nimi, destinationId) => {
   try {
@@ -10,17 +13,15 @@ const createPainike = async (sisaltoId, nimi, destinationId) => {
     });
 
     const newPainike = response.data;
-    console.log(`New Painike ID: ${newPainike.id}`);
-    console.log(`New Painike nimi: ${newPainike.nimi}`);
+    console.log(`Uusi Painike ID: ${newPainike.id}`);
+    console.log(`Uusi Painike nimi: ${newPainike.nimi}`);
 
     return newPainike;
   } catch (error) {
-    console.error('Error creating Painike:', error);
+    console.error('Virhe Painikkeen luonnissa:', error);
     throw error;
   }
 };
-
-
 
 const editPainike = async (painikeId, nimi, destinationId) => {
   try {
@@ -30,12 +31,12 @@ const editPainike = async (painikeId, nimi, destinationId) => {
     });
 
     const updatedPainike = response.data;
-    console.log(`Updated Painike ID: ${updatedPainike.id}`);
-    console.log(`Updated Painike nimi: ${updatedPainike.nimi}`);
+    console.log(`Päivitetty Painike ID: ${updatedPainike.id}`);
+    console.log(`Päivitetty Painike nimi: ${updatedPainike.nimi}`);
 
     return updatedPainike;
   } catch (error) {
-    console.error('Error editing Painike:', error);
+    console.error('Virhe Painikkeen muokkauksessa:', error);
     throw error;
   }
 };
@@ -45,25 +46,36 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   const [destinationId, setDestinationId] = useState('');
   const [sisaltoOptions, setSisaltoOptions] = useState([]);
   const [createdPainikes, setCreatedPainikes] = useState([]);
-  const [selectedPainikeId, setSelectedPainikeId] = useState(null); // Add a state to track the selected Painike for editing
-  const [updatedPainike, setUpdatedPainike] = useState(null); // Declare it here
+  const [selectedPainikeId, setSelectedPainikeId] = useState(null);
+  const [groupedSisaltoOptions, setGroupedSisaltoOptions] = useState({});
+  const [runkoNameMapping, setRunkoNameMapping] = useState({});
+  const [updatedPainike, setUpdatedPainike] = useState(null);
 
   const fetchSisaltoOptions = async () => {
     try {
       const response = await axios.get('http://localhost:3001/api/get-sisalto-options');
       const sisaltoOptionsData = response.data;
 
-      console.log('Fetched sisalto options:', sisaltoOptionsData);
+      console.log('Sisältövaihtoehdot haettu:', sisaltoOptionsData);
 
-      const filteredSisaltoOptions = sisaltoOptionsData.filter((sisaltoOption) => {
-        return !createdPainikes.some((painike) => painike.sisaltoId === sisaltoOption.id);
+      const groupedOptions = {};
+      sisaltoOptionsData.forEach((sisaltoOption) => {
+        if (!groupedOptions[sisaltoOption.runko_id]) {
+          groupedOptions[sisaltoOption.runko_id] = [];
+        }
+        groupedOptions[sisaltoOption.runko_id].push(sisaltoOption);
       });
 
-      const filteredOptions = filteredSisaltoOptions.filter((sisaltoOption) => sisaltoOption.id !== otsikkoId);
+      setGroupedSisaltoOptions(groupedOptions);
 
-      setSisaltoOptions(filteredOptions);
+      const updatedRunkoNameMapping = {};
+      sisaltoOptionsData.forEach((sisaltoOption) => {
+        updatedRunkoNameMapping[sisaltoOption.runko_id] = sisaltoOption.runko_nimi;
+      });
+
+      setRunkoNameMapping(updatedRunkoNameMapping);
     } catch (error) {
-      console.error('Error fetching sisalto options:', error);
+      console.error('Virhe sisältövaihtoehtojen haussa:', error);
     }
   };
 
@@ -71,13 +83,12 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
     try {
       const response = await axios.get(`http://localhost:3001/api/painike/${otsikkoId}`);
       const existingPainikes = response.data;
-  
-      console.log('Fetched existing painikes:', existingPainikes);
-  
-      // Set the existing painikes in the state
+
+      console.log('Olemassa olevat Painikkeet haettu:', existingPainikes);
+
       setCreatedPainikes(existingPainikes);
     } catch (error) {
-      console.error('Error fetching existing painikes:', error);
+      console.error('Virhe olemassa olevien Painikkeiden haussa:', error);
     }
   };
 
@@ -89,29 +100,25 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   const handleButtonClick = async () => {
     try {
       if (createdPainikes.length >= 4) {
-        console.error('Maximum limit of buttons reached for this otsikko.');
+        console.error('Maksimimäärä Painikkeita saavutettu tälle otsikolle.');
         return;
       }
 
       if (selectedPainikeId) {
-        // If a Painike is selected for editing, call editPainike instead of createPainike
         const updatedPainike = await editPainike(selectedPainikeId, nimi, destinationId);
-        console.log('Updated Painike:', updatedPainike);
+        console.log('Päivitetty Painike:', updatedPainike);
 
-        // Log the response from the server and the current state
-        console.log('Response from server after edit:', updatedPainike);
-        console.log('Current state before update:', createdPainikes);
+        console.log('Vastaus palvelimelta muokkauksen jälkeen:', updatedPainike);
+        console.log('Nykyinen tila ennen päivitystä:', createdPainikes);
 
-        // Update the state with the edited button
         const updatedPainikesArray = createdPainikes.map((painike) =>
           painike.id === selectedPainikeId ? updatedPainike : painike
         );
 
         setCreatedPainikes(updatedPainikesArray);
-        setSelectedPainikeId(null); // Reset the selected Painike ID
+        setSelectedPainikeId(null);
 
-        // Log the current state after update
-        console.log('Current state after update:', createdPainikes);
+        console.log('Nykyinen tila päivityksen jälkeen:', createdPainikes);
       } else {
         const newPainike = await createPainike(otsikkoId, nimi, destinationId);
         setCreatedPainikes([...createdPainikes, newPainike]);
@@ -119,15 +126,13 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
 
       setNimi('');
       setDestinationId('');
-      // Notify the parent component about the updated Painike
       onPainikeUpdated(updatedPainike);
     } catch (error) {
-      console.error('Error creating/editing Painike:', error);
+      console.error('Virhe Painikkeen luomisessa/muokkauksessa:', error);
     }
   };
 
   const handleEditClick = (painikeId) => {
-    // Handle edit button click by setting the selected Painike ID for editing
     const selectedPainike = createdPainikes.find((painike) => painike.id === painikeId);
     if (selectedPainike) {
       setNimi(selectedPainike.nimi);
@@ -140,29 +145,28 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
 
   const handleDeleteClick = async (painikeId) => {
     try {
-      // Make an HTTP DELETE request to the server to delete the Painike
       await axios.delete(`http://localhost:3001/api/delete-painike/${painikeId}`);
-  
-      // After successful deletion, update the state to remove the deleted Painike
+
       const updatedPainikesArray = createdPainikes.filter((painike) => painike.id !== painikeId);
       setCreatedPainikes(updatedPainikesArray);
-  
-      console.log('Painike deleted successfully');
+
+      console.log('Painike poistettu onnistuneesti');
     } catch (error) {
-      console.error('Error deleting Painike:', error);
+      console.error('Virhe Painikkeen poistamisessa:', error);
     }
   };
-  
+
+  console.log('Runko-nimikartoitus:', runkoNameMapping);
 
   return (
     <div>
       {isButtonLimitReached ? (
-        <p>Button limit reached (4/4). Input fields are hidden.</p>
+        <p>Painikkeiden enimmäismäärä saavutettu (4/4). Syötekentät ovat piilotettu.</p>
       ) : (
         <>
           <input
             type="text"
-            placeholder="Enter Nimi"
+            placeholder="Syötä nimi"
             value={nimi}
             onChange={(e) => setNimi(e.target.value)}
           />
@@ -171,29 +175,45 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
             value={destinationId}
             onChange={(e) => setDestinationId(e.target.value)}
           >
-            <option value="">Select Destination</option>
-            {sisaltoOptions.map((sisaltoOption) => (
-              <option key={sisaltoOption.id} value={sisaltoOption.id}>
-                {sisaltoOption.otsikko}
-              </option>
+            <option value="">Valitse kohde</option>
+            {Object.keys(groupedSisaltoOptions).map((runkoId) => (
+              <optgroup key={runkoId} label={`${runkoNameMapping[runkoId]}`}>
+                {groupedSisaltoOptions[runkoId].map((sisaltoOption) => (
+                  <option key={sisaltoOption.id} value={sisaltoOption.id}>
+                    {sisaltoOption.otsikko}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
 
-          <button onClick={handleButtonClick}>
-            {selectedPainikeId ? 'Edit Painike' : 'Create Painike'}
+          <button className="button" onClick={handleButtonClick}>
+      {selectedPainikeId ? 'Muokkaa Painiketta' : 'Luo Painike'}
           </button>
         </>
       )}
 
-{createdPainikes.map((painike) => (
-  <div key={painike.id}>
-    <button onClick={() => handleEditClick(painike.id)}>Edit</button>
-    <button>{painike.nimi || 'No Name'}</button>
-    <button onClick={() => handleDeleteClick(painike.id)}>Delete</button> {/* Add this */}
-  </div>
-))}
+      {createdPainikes.map((painike) => (
+        <div key={painike.id}>
+          <span
+className="button-icon"
+onClick={() => handleEditClick(painike.id)}
+>
+<button className="button">{painike.nimi || 'Nimi puuttuu'}</button>
+<FontAwesomeIcon icon={faEdit} />
+</span>
+
+          <span
+className="button-icon"
+onClick={() => handleDeleteClick(painike.id)}
+>
+<FontAwesomeIcon icon={faTrash} />
+</span>
+        </div>
+      ))}
     </div>
   );
 };
 
 export default Painike;
+

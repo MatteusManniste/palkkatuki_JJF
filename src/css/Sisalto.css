@@ -1,0 +1,26 @@
+.sisalto-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+.sisalto-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f2f2f7;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .sisalto-link {
+    font-size: 14px;
+  }
+}
+
+  .arrow-icon {
+    color: #333;
+    margin-left: 15px;
+  }
+  

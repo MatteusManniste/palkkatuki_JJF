@@ -1,25 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link, useLocation } from 'react-router-dom'; // Import Link and useLocation
+import { Link, useLocation } from 'react-router-dom';
 import Sisalto from './Sisalto';
-
-const runkoStyle = {
-  backgroundColor: 'yellow',
-  padding: '10px',
-  margin: '10px',
-  boxShadow: '2px 2px 5px rgba(0, 0, 0, 0.2)',
-  borderRadius: '5px',
-  width: '300px',
-  position: 'relative',
-};
-
+import './css/Runko.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 const Runko = () => {
   const [runkos, setRunkos] = useState([]);
-  const location = useLocation(); // Get the current location
+  const location = useLocation();
 
   useEffect(() => {
-    // Fetch runkos from your Express.js API endpoint
-    axios.get('http://localhost:3001/api/runko')
+    axios
+      .get('http://localhost:3001/api/runko')
       .then((response) => {
         setRunkos(response.data);
       })
@@ -29,18 +21,28 @@ const Runko = () => {
   }, []);
 
   return (
-    <div>
-     {runkos.map((runko) => (
-      <div key={runko.id} style={runkoStyle}>
-        <h2>{runko.nimike}</h2>
-        {location.pathname.includes('hallintapaneeli') && (
-          <Link to={`/sivueditor/${encodeURIComponent(runko.id)}`}>
-            Sivueditor
-          </Link>
-        )}
-        <Sisalto runkoId={runko.id} />
-      </div>
-    ))}
+    <div className="runko-container">
+      {runkos.map((runko) => (
+        <div key={runko.id} className="runko-box">
+          <h1>{runko.nimike}</h1>
+          {location.pathname.includes('hallintapaneeli') && (
+            <Link to={`/sivueditor/${encodeURIComponent(runko.id)}`}>
+              Muokkaa
+            </Link>
+          )}
+          <Sisalto runkoId={runko.id} />
+        </div>
+      ))}
+
+<div className="laskuri-box">
+  <Link to="/laskuri" className="custom-link">
+    <h1>Palkkatukilaskuri
+      <span className="arrow-icon">
+        <FontAwesomeIcon icon={faArrowRight} />
+      </span>
+    </h1>
+  </Link>
+</div>
     </div>
   );
 };

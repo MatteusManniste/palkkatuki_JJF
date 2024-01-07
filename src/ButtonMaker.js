@@ -23,7 +23,7 @@ const addButtonStyle = {
 
 const buttonContainerStyle = {
   display: 'flex',
-  flexDirection: 'row', // Display buttons in a row
+  flexDirection: 'row',
   alignItems: 'center',
 };
 
@@ -34,7 +34,7 @@ const buttonStyle = {
   border: 'none',
   borderRadius: '5px',
   cursor: 'pointer',
-  marginLeft: '10px', // Add margin to separate buttons
+  marginLeft: '10px',
 };
 
 const ButtonMaker = () => {
@@ -83,10 +83,8 @@ const ButtonMaker = () => {
                 onChange={(event) => handleDestinationChange(index, event)}
               >
                 <option value="">Select Destination</option>
-                {/* You can add options dynamically from your database */}
                 <option value="destination1">Destination 1</option>
                 <option value="destination2">Destination 2</option>
-                {/* Add more options as needed */}
               </select>
             </div>
           ))}
