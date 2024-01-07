@@ -7,7 +7,7 @@ const db = mysql.createConnection({
   password: '',
   database: 'palkkatuki',
 });
-// Yhdistä MySQL-tietokantaan
+
 db.connect((err) => {
   if (err) {
     console.error('Virhe yhdistettäessä MySQL-tietokantaan:', err);
@@ -177,11 +177,6 @@ async function createMatrixColumns(questions, answers) {
   return newEntries;
 }
 
-
-
-
-
-
 async function insertMatrixDataFromExcel(questions, answers) {
   try {
     const workbook = new ExcelJS.Workbook();
@@ -201,13 +196,11 @@ async function insertMatrixDataFromExcel(questions, answers) {
       }
 
       if (values.some((value) => value !== null && value !== '')) {
-        // Create column names for insertion
         const columnNames = [
           ...questions.map((_, index) => `kysymys_${index + 1}`),
-          ...answers.map((_, index) => `vastaus_${questions.length + index + 1}`) // Start answers after questions
+          ...answers.map((_, index) => `vastaus_${questions.length + index + 1}`)
         ].join(', ');
 
-        // Create placeholders for the values
         const placeholders = new Array(values.length).fill('?').join(', ');
         const insertDataQuery = `INSERT INTO matrix (${columnNames}) VALUES (${placeholders})`;
 
@@ -270,12 +263,8 @@ async function Mörönheräys() {
   }
 }
 
-
 Mörönheräys();
 
-// Kantojen haku
-
-// Hae kaikki tiedot taulukosta "runko"
 const SelectFromRunko = (callback) => {
   const sql = 'SELECT * FROM runko';
   db.query(sql, (err, tulokset) => {
@@ -288,7 +277,6 @@ const SelectFromRunko = (callback) => {
   });
 };
 
-// Hae tiedot taulukosta "runko" ID:n perusteella
 const SelectFromRunkoById = (runkoId, callback) => {
   const sql = 'SELECT * FROM runko WHERE id = ?';
   const values = [runkoId];
@@ -307,7 +295,6 @@ const SelectFromRunkoById = (runkoId, callback) => {
   });
 }
 
-// Hae tiedot taulukosta "sisalto" runko_id:n perusteella järjestyksessä
 const SelectFromSisaltoByRunkoId = (runkoId, callback) => {
   const sql = 'SELECT * FROM sisalto WHERE runko_id = ?  ORDER BY jarjestysNro ASC';
   db.query(sql, [runkoId], (err, tulokset) => {
@@ -320,7 +307,6 @@ const SelectFromSisaltoByRunkoId = (runkoId, callback) => {
   });
 };
 
-// Hae tiedot taulukosta "sisalto" otsikon perusteella
 const SelectFromSisaltoByOtsikko = (otsikko, callback) => {
   const sql = 'SELECT id, otsikko, kentta FROM sisalto WHERE otsikko = ?';
   db.query(sql, [otsikko], (err, tulokset) => {
@@ -333,7 +319,6 @@ const SelectFromSisaltoByOtsikko = (otsikko, callback) => {
   });
 };
 
-// Hae tiedot taulukosta "painike" sisalto_id:n perusteella
 const SelectFromPainikeBySisaltoId = (sisaltoId, callback) => {
   const sql = 'SELECT * FROM painike WHERE sisalto_id = ?';
   db.query(sql, [sisaltoId], (err, tulokset) => {
@@ -346,7 +331,6 @@ const SelectFromPainikeBySisaltoId = (sisaltoId, callback) => {
   });
 };
 
-// Hae tiedot taulukosta "sisalto" ID:n perusteella
 function SelectFromSisaltoById(id, callback) {
   const kysely = `SELECT * FROM sisalto WHERE id = ?`;
   db.query(kysely, [id], (virhe, tulokset) => {
@@ -359,7 +343,6 @@ function SelectFromSisaltoById(id, callback) {
   });
 }
 
-// Hae uusin nimike taulukosta "runko"
 const SelectNimikeFromRunko = (callback) => {
   const sql = 'SELECT nimike FROM runko ORDER BY id DESC LIMIT 1';
   db.query(sql, (err, result) => {
@@ -372,7 +355,6 @@ const SelectNimikeFromRunko = (callback) => {
   });
 };
 
-// Hae uusin otsikko taulukosta "sisalto"
 const SelectFromSisalto = (callback) => {
   const sql = 'SELECT otsikko FROM sisalto ORDER BY id DESC LIMIT 1';
   db.query(sql, (err, result) => {
@@ -384,7 +366,6 @@ const SelectFromSisalto = (callback) => {
   });
 };
 
-// Hae otsikot runko_id:n perusteella
 const getOtsikkoByRunkoId = (runko_id, callback) => {
   const sql = 'SELECT id, otsikko, jarjestysNro FROM sisalto WHERE runko_id = ? ORDER BY jarjestysNro ASC';
   db.query(sql, [runko_id], (err, result) => {
@@ -396,7 +377,6 @@ const getOtsikkoByRunkoId = (runko_id, callback) => {
   });
 };
 
-// Lisää uusi nimike taulukkoon "runko"
 const insertTitle = (titleText, callback) => {
   const sql = 'INSERT INTO runko (nimike) VALUES (?)';
   db.query(sql, [titleText], (err, result) => {
@@ -409,7 +389,6 @@ const insertTitle = (titleText, callback) => {
   });
 };
 
-// Luo tai päivitä otsikko taulukossa "sisalto"
 const createOrUpdateOtsikko = (text, runko_id, callback) => {
   const insertSql = 'INSERT INTO sisalto (otsikko, runko_id) VALUES (?, ?)';
   db.query(insertSql, [text, runko_id], (err) => {
@@ -421,7 +400,6 @@ const createOrUpdateOtsikko = (text, runko_id, callback) => {
   });
 };
 
-// Lisää uusi painike taulukkoon "painike"
 const insertPainike = (sisaltoId, nimi, destinationId, callback) => {
   const sql = 'INSERT INTO painike (sisalto_id, nimi, destination_id) VALUES (?, ?, ?)';
   db.query(sql, [sisaltoId, nimi, destinationId], (err, result) => {
@@ -434,7 +412,6 @@ const insertPainike = (sisaltoId, nimi, destinationId, callback) => {
   });
 };
 
-// Hae sisältövaihtoehdot
 const haeSisaltoOptions = (callback) => {
   const sql = 'SELECT s.id, s.runko_id, s.otsikko, r.nimike AS runko_nimi FROM sisalto AS s JOIN runko AS r ON s.runko_id = r.id';
   db.query(sql, (err, tulokset) => {
@@ -448,7 +425,6 @@ const haeSisaltoOptions = (callback) => {
   });
 };
 
-// Hae kenttäsisu sisältö ID:n perusteella
 const getKenttaContent = (Id, callback) => {
   const sql = 'SELECT kentta FROM sisalto WHERE id = ?';
   db.query(sql, [Id], (err, result) => {
@@ -468,7 +444,6 @@ const getKenttaContent = (Id, callback) => {
   });
 };
 
-// Päivitä nimike
 const updateTitle = (id, newText, callback) => {
   const sql = 'UPDATE runko SET nimike = ? WHERE id = ?';
   db.query(sql, [newText, id], (err, result) => {
@@ -481,7 +456,6 @@ const updateTitle = (id, newText, callback) => {
   });
 };
 
-// Muokkaa painiketta
 const editPainike = async (id, nimi, destinationId) => {
   console.log('Saatu tiedot painikkeen muokkaamiseen:', { id, nimi, destinationId });
   const updateSql = 'UPDATE painike SET nimi = ?, destination_id = ? WHERE id = ?';
@@ -509,7 +483,6 @@ const editPainike = async (id, nimi, destinationId) => {
   });
 };
 
-// Päivitä rikas tekstisisältö otsikon ID:n perusteella
 const updateRichTextForOtsikko = (otsikkoId, richText, callback) => {
   const sql = 'UPDATE sisalto SET kentta = ? WHERE id = ?';
   console.log('Rikas teksti:', richText);
@@ -523,7 +496,6 @@ const updateRichTextForOtsikko = (otsikkoId, richText, callback) => {
   });
 };
 
-// Päivitä otsikon järjestys
 const updateOtsikkoOrder = async (otsikkos) => {
   try {
     const updateQueries = otsikkos.map((otsikko) => {
@@ -538,7 +510,6 @@ const updateOtsikkoOrder = async (otsikkos) => {
   }
 };
 
-// Päivitä otsikko
 const updateOtsikko = (id, text, callback) => {
   const sql = 'UPDATE sisalto SET otsikko = ? WHERE id = ?';
   db.query(sql, [text, id], (err, result) => {
@@ -551,7 +522,6 @@ const updateOtsikko = (id, text, callback) => {
   });
 };
 
-// Poista nimike ID:n perusteella
 const deleteNimikeById = (id, callback) => {
   const sql = 'DELETE FROM runko WHERE id = ?';
   const values = [id];
@@ -565,7 +535,6 @@ const deleteNimikeById = (id, callback) => {
   });
 };
 
-// Poista painike
 const deletePainike = (id, callback) => {
   console.log('Poistetaan painike ID:llä:', id);
   const sql = 'DELETE FROM painike WHERE id = ?';
@@ -581,7 +550,6 @@ const deletePainike = (id, callback) => {
   });
 };
 
-// Poista otsikko
 const deleteOtsikko = (otsikkoId, callback) => {
   const sql = 'DELETE FROM sisalto WHERE id = ?';
   db.query(sql, [otsikkoId], (err, result) => {
@@ -594,7 +562,6 @@ const deleteOtsikko = (otsikkoId, callback) => {
   });
 };
 
-// Hae kaikki kysymykset tietokannasta
 const SelectFromQuestions = (callback) => {
   const sql = 'SELECT * FROM questions WHERE type = "Kysymys"';
   db.query(sql, (err, results) => {
@@ -607,7 +574,6 @@ const SelectFromQuestions = (callback) => {
   });
 };
 
-// Hae kaikki vastaukset tietokannasta
 const SelectFromQuestionsAnswers = (callback) => {
   const sql = 'SELECT * FROM questions WHERE type = "Vastaus"';
   db.query(sql, (err, results) => {
@@ -620,7 +586,6 @@ const SelectFromQuestionsAnswers = (callback) => {
   });
 };
 
-// Hae kaikki vastaukset tietokannasta
 const SelectAllAnswers = (callback) => {
   const sql = 'SELECT * FROM answers';
   db.query(sql, (err, results) => {
@@ -633,7 +598,6 @@ const SelectAllAnswers = (callback) => {
   });
 };
 
-// Suorita mukautettu kysely
 const ExecuteMatrixQuery = (sql, callback) => {
   db.query(sql, (err, results) => {
     if (err) {
@@ -644,7 +608,6 @@ const ExecuteMatrixQuery = (sql, callback) => {
     callback(null, results);
   });
 };
-
 
 module.exports = {
   SelectFromRunko,

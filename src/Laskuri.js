@@ -150,8 +150,8 @@ const Laskuri = () => {
       <div>
         {Object.entries(result).map(([field, text], index) => {
           if (field.startsWith('vastaus_') && text) {
-            const id = field.split('_')[1]; // Extract the ID
-            const correspondingText = vastausDataObject[id] || ''; // Look up the text
+            const id = field.split('_')[1];
+            const correspondingText = vastausDataObject[id] || '';
             return (
               <div key={index} className="result-text">
                 {correspondingText && `${correspondingText}: `}

@@ -15,7 +15,6 @@ const saveRichText = async () => {
 
     console.log('Rich text content saved successfully');
   } catch (error) {
-    // Handle errors
     console.error('Error saving rich text content:', error);
   }
 };

@@ -7,7 +7,6 @@ const Breadcrumb = ({ breadcrumbs }) => {
     navigate(path);
   };
 
-
   return (
     <div className="breadcrumbs">
       <span style={{ cursor: 'pointer' }} onClick={() => goToBreadcrumb('/')}>

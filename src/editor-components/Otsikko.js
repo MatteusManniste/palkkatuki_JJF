@@ -5,8 +5,6 @@ import TextEditor from './TextEditor';
 import '../css/Otsikko.css';
 import Painike from './Painike';
 
-
-
 const Otsikko = ({ nimikeId }) => {
   const [otsikkoText, setOtsikkoText] = useState('');
   const [otsikkoData, setOtsikkoData] = useState([]);
@@ -14,7 +12,6 @@ const Otsikko = ({ nimikeId }) => {
   const [selectedOtsikkoId, setSelectedOtsikkoId] = useState(null);
   const maxOtsikkoCount = 5;
   const [kenttaContent, setKenttaContent] = useState('');
-
 
   useEffect(() => {
     fetchOtsikkoData();

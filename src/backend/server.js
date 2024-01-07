@@ -6,25 +6,18 @@ const port = process.env.PORT || 3001;
 
 const Data = require('./data');
 
-// Käytetään JSON-muotoista dataa
 app.use(express.json());
-// Käytetään CORS-middlewarea sallimaan ristikkomainen pyyntöjen käsittely
+
 app.use(cors());
-// Asetetaan CORS-asetukset
+
 const corsOptions = {
-  origin: 'http://localhost:3000', // Sallitaan vain pyynnöt localhostin osoitteesta
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Sallitut HTTP-metodit
-  credentials: true, // Sallitaan evästeiden (cookies) käyttö
+  origin: 'http://localhost:3000',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
 };
 
-// Käytetään CORS-asetuksia
 app.use(cors(corsOptions));
 
-// API-reitit
-
-// Määritellään reitit ja niiden toiminnot
-
-// Hakee kaikki "runko"-tietueet
 app.get('/api/runko', (req, res) => {
   try {
     Data.SelectFromRunko((err, result) => {
@@ -41,7 +34,6 @@ app.get('/api/runko', (req, res) => {
   }
 });
 
-// Hakee "runko"-tietueen tietyn ID:n perusteella
 app.get('/api/runko/:runkoId', (req, res) => {
   const { runkoId } = req.params;
   Data.SelectFromRunkoById(runkoId, (err, runkoData) => {
@@ -53,7 +45,6 @@ app.get('/api/runko/:runkoId', (req, res) => {
   });
 });
 
-// Poistaa "runko"-tietueen tietyn ID:n perusteella
 app.delete('/api/delete-title/:id', (req, res) => {
   const { id } = req.params;
   Data.deleteNimikeById(id, (err, result) => {
@@ -71,7 +62,6 @@ app.delete('/api/delete-title/:id', (req, res) => {
   });
 });
 
-// Hakee "sisalto"-tietueen tietyn otsikon perusteella
 app.get('/api/sisalto/:otsikko', (req, res) => {
   const { otsikko } = req.params;
   Data.SelectFromSisaltoByOtsikko(otsikko, (err, data) => {
@@ -84,7 +74,6 @@ app.get('/api/sisalto/:otsikko', (req, res) => {
   });
 });
 
-// Hakee "sisalto"-tietueen tietyn "runko"-tietueen ID:n perusteella
 app.get('/api/sisalto/runko/:runkoId', (req, res) => {
   const { runkoId } = req.params;
   Data.SelectFromSisaltoByRunkoId(runkoId, (err, data) => {
@@ -96,7 +85,6 @@ app.get('/api/sisalto/runko/:runkoId', (req, res) => {
   });
 });
 
-// Hakee "painike"-tietueet tietyn "sisalto"-tietueen ID:n perusteella
 app.get('/api/painike/:sisaltoId', (req, res) => {
   const { sisaltoId } = req.params;
   Data.SelectFromPainikeBySisaltoId(sisaltoId, (err, data) => {
@@ -108,7 +96,6 @@ app.get('/api/painike/:sisaltoId', (req, res) => {
   });
 });
 
-// Hakee "sisalto"-tietueen tietyn ID:n perusteella
 app.get('/api/sisalto/id/:id', (req, res) => {
   const { id } = req.params;
   Data.SelectFromSisaltoById(id, (err, data) => {
@@ -121,7 +108,6 @@ app.get('/api/sisalto/id/:id', (req, res) => {
   });
 });
 
-// Hakee uusimman "runko"-tietueen nimikkeen
 app.get('/api/get-new-title', (req, res) => {
   Data.SelectNimikeFromRunko((err, title) => {
     if (err) {
@@ -133,7 +119,6 @@ app.get('/api/get-new-title', (req, res) => {
   });
 });
 
-// Luo uuden "runko"-tietueen nimikkeen
 app.post('/api/create-title', (req, res) => {
   const { text } = req.body;
   Data.insertTitle(text, (err, result) => {
@@ -148,8 +133,6 @@ app.post('/api/create-title', (req, res) => {
   });
 });
 
-
-// Päivittää "otsikko"-tietueen tietyn ID:n perusteella
 app.put('/api/update-otsikko/:id', (req, res) => {
   const { id } = req.params;
   const { text } = req.body;
@@ -163,7 +146,6 @@ app.put('/api/update-otsikko/:id', (req, res) => {
   });
 });
 
-// Päivittää "nimike"-tietueen tietyn ID:n perusteella
 app.put('/api/update-title/:id', (req, res) => {
   const { id } = req.params;
   const { newText } = req.body;
@@ -177,7 +159,6 @@ app.put('/api/update-title/:id', (req, res) => {
   });
 });
 
-// Hakee "otsikko"-tietueen tietyn "runko"-tietueen ID:n perusteella
 app.get('/api/get-otsikko/:runko_id', (req, res) => {
   const { runko_id } = req.params;
   Data.getOtsikkoByRunkoId(runko_id, (err, data) => {
@@ -190,7 +171,6 @@ app.get('/api/get-otsikko/:runko_id', (req, res) => {
   });
 });
 
-// Luo tai päivittää "otsikko"-tietueen tietyn "runko"-tietueen ja tekstin perusteella
 app.post('/api/create-otsikko', (req, res) => {
   const { text, runko_id } = req.body;
   Data.createOrUpdateOtsikko(text, runko_id, (err, result, otsikkoIds) => {
@@ -205,7 +185,6 @@ app.post('/api/create-otsikko', (req, res) => {
   });
 });
 
-// Päivittää "otsikko"-tietueiden järjestyksen
 const { updateOtsikkoOrder } = require('./data');
 app.put('/api/update-otsikko-order', async (req, res) => {
   const otsikkos = req.body;
@@ -218,7 +197,6 @@ app.put('/api/update-otsikko-order', async (req, res) => {
   }
 });
 
-// Poistaa "otsikko"-tietueen tietyn ID:n perusteella
 app.delete('/api/delete-otsikko/:id', (req, res) => {
   const otsikkoId = req.params.id;
   try {
@@ -240,7 +218,6 @@ app.delete('/api/delete-otsikko/:id', (req, res) => {
   }
 });
 
-// Tallentaa rikkaan tekstin "otsikko"-tietueelle
 app.post('/api/save-rich-text/:id', async (req, res) => {
   const { id } = req.params;
   const { richText } = req.body;
@@ -260,7 +237,6 @@ app.post('/api/save-rich-text/:id', async (req, res) => {
   }
 });
 
-// Luo uuden "painike"-tietueen
 app.post('/api/create-painike', (req, res) => {
   const { sisaltoId, nimi, destinationId } = req.body;
   Data.insertPainike(sisaltoId, nimi, destinationId, (err, result) => {
@@ -275,7 +251,6 @@ app.post('/api/create-painike', (req, res) => {
   });
 });
 
-// Hakee "sisalto"-tietueiden asetukset
 app.get('/api/get-sisalto-options', (req, res) => {
   try {
     Data.haeSisaltoOptions((err, sisaltoOptions) => {
@@ -292,7 +267,6 @@ app.get('/api/get-sisalto-options', (req, res) => {
   }
 });
 
-// Päivittää "painike"-tietueen tietyn ID:n perusteella
 app.put('/api/edit-painike/:id', async (req, res) => {
   const { id } = req.params;
   const { nimi, destinationId } = req.body;
@@ -306,7 +280,6 @@ app.put('/api/edit-painike/:id', async (req, res) => {
   }
 });
 
-// Poistaa "painike"-tietueen tietyn ID:n perusteella
 app.delete('/api/delete-painike/:id', (req, res) => {
   const { id } = req.params;
   Data.deletePainike(id, (err, deletedPainike) => {
@@ -320,7 +293,6 @@ app.delete('/api/delete-painike/:id', (req, res) => {
   });
 });
 
-// Hakee "kentta"-sisällön tietyn "otsikko"-tietueen ID:n perusteella
 app.get('/api/get-kentta-content/:otsikkoId', (req, res) => {
   const { otsikkoId } = req.params;
   Data.getKenttaContent(parseInt(otsikkoId, 10), (err, kenttaContent) => {
@@ -337,7 +309,6 @@ app.get('/api/get-kentta-content/:otsikkoId', (req, res) => {
   });
 });
 
-// Asetukset tiedostojen tallennukselle
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -350,7 +321,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Lataa kuvan palvelimelle ja palauttaa sen URL:n
 app.post('/api/upload-image', upload.single('image'), (req, res) => {
   try {
     const imageUrl = `http://localhost:${port}/${req.file.path}`;
@@ -361,7 +331,6 @@ app.post('/api/upload-image', upload.single('image'), (req, res) => {
   }
 });
 
-// Hakee kaikki kysymykset
 app.get('/api/questions', (req, res) => {
   Data.SelectFromQuestions((err, data) => {
     if (err) {
@@ -373,7 +342,6 @@ app.get('/api/questions', (req, res) => {
   });
 });
 
-// Hakee "vastaus"-tietueet
 app.get('/api/vastaus', (req, res) => {
   Data.SelectFromQuestionsAnswers((err, data) => {
     if (err) {
@@ -385,7 +353,6 @@ app.get('/api/vastaus', (req, res) => {
   });
 });
 
-// Hakee kaikki vastaukset
 app.get('/api/answers', (req, res) => {
   Data.SelectAllAnswers((err, data) => {
     if (err) {
@@ -397,7 +364,6 @@ app.get('/api/answers', (req, res) => {
   });
 });
 
-// Suorittaa matriisin kyselyn
 app.post('/api/matrix/query', (req, res) => {
   const { sql } = req.body;
 
