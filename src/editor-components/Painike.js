@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -56,6 +56,8 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   const [groupedSisaltoOptions, setGroupedSisaltoOptions] = useState({});
   const [runkoNameMapping, setRunkoNameMapping] = useState({});
   const [updatedPainike, setUpdatedPainike] = useState(null);
+
+  const selectRef = useRef(null);
 
   const fetchSisaltoOptions = async () => {
     try {
@@ -158,6 +160,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
       setNimi(selectedPainike.nimi);
       setDestinationId(selectedPainike.destinationId);
       setSelectedPainikeId(painikeId);
+      selectRef.current.value = selectedPainike.destination_id;
     }
   };
 
@@ -197,8 +200,8 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
             value={nimi}
             onChange={(e) => setNimi(e.target.value)}
           />
-
           <select
+            ref={selectRef}
             value={destinationId}
             onChange={(e) => setDestinationId(e.target.value)}
           >
