@@ -1,6 +1,6 @@
-import React from 'react';
-import NimikeEditor from './SivuEditor-components/NimikeEditor';
-import OtsikkoEditor from './SivuEditor-components/OtsikkoEditor';
+import React from "react";
+import NimikeEditor from "./SivuEditor-components/NimikeEditor";
+import OtsikkoEditor from "./SivuEditor-components/OtsikkoEditor";
 
 const SivuEditor = () => {
   return (

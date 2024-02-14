@@ -1,10 +1,10 @@
-import React from 'react';
-import Runko from './Runko';
+import React from "react";
+import Runko from "./Runko";
 
 const Etusivu = () => {
   return (
     <div>
-        <Runko />
+      <Runko />
     </div>
   );
 };

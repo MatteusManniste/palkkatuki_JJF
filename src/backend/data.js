@@ -1,27 +1,27 @@
-const mysql = require('mysql');
-const ExcelJS = require('exceljs');
+const mysql = require("mysql");
+const ExcelJS = require("exceljs");
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'palkkatuki',
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "palkkatuki",
 });
 
 db.connect((err) => {
   if (err) {
-    console.error('Virhe yhdistettäessä MySQL-tietokantaan:', err);
+    console.error("Virhe yhdistettäessä MySQL-tietokantaan:", err);
     return;
   }
-  console.log('Yhdistetty MySQL-tietokantaan');
+  console.log("Yhdistetty MySQL-tietokantaan");
 });
 
 async function dropMatrixTable() {
-  const dropTableQuery = 'DROP TABLE matrix';
+  const dropTableQuery = "DROP TABLE matrix";
   return new Promise((resolve) => {
     db.query(dropTableQuery, (dropTableError) => {
       if (dropTableError) {
-        console.error('Virhe taulukon poistossa:', dropTableError);
+        console.error("Virhe taulukon poistossa:", dropTableError);
         resolve(false);
       } else {
         console.log('Taulukko "matrix" poistettu');
@@ -32,11 +32,12 @@ async function dropMatrixTable() {
 }
 
 async function recreateMatrixTable() {
-  const recreateTableQuery = 'CREATE TABLE matrix (id INT AUTO_INCREMENT PRIMARY KEY)';
+  const recreateTableQuery =
+    "CREATE TABLE matrix (id INT AUTO_INCREMENT PRIMARY KEY)";
   return new Promise((resolve) => {
     db.query(recreateTableQuery, (recreateTableError) => {
       if (recreateTableError) {
-        console.error('Virhe taulukon luomisessa:', recreateTableError);
+        console.error("Virhe taulukon luomisessa:", recreateTableError);
         resolve(false);
       } else {
         console.log('Taulukko "matrix" uudelleenluotu');
@@ -48,39 +49,45 @@ async function recreateMatrixTable() {
 
 async function truncateAnswersTable() {
   try {
-    const truncateAnswersQuery = 'TRUNCATE TABLE answers';
+    const truncateAnswersQuery = "TRUNCATE TABLE answers";
     await new Promise((resolve) => {
       db.query(truncateAnswersQuery, (truncateError) => {
         if (truncateError) {
-          console.error('Virhe "answers" taulukon tyhjentämisessä:', truncateError);
+          console.error(
+            'Virhe "answers" taulukon tyhjentämisessä:',
+            truncateError,
+          );
           resolve(false);
         } else {
-          console.log('Answers-taulukko tyhjennetty.');
+          console.log("Answers-taulukko tyhjennetty.");
           resolve(true);
         }
       });
     });
   } catch (error) {
-    console.error('Tapahtui virhe:', error);
+    console.error("Tapahtui virhe:", error);
   }
 }
 
 async function truncateQuestionsTable() {
   try {
-    const truncateQuestionsQuery = 'TRUNCATE TABLE questions';
+    const truncateQuestionsQuery = "TRUNCATE TABLE questions";
     await new Promise((resolve) => {
       db.query(truncateQuestionsQuery, (truncateError) => {
         if (truncateError) {
-          console.error('Virhe "questions" taulukon tyhjentämisessä:', truncateError);
+          console.error(
+            'Virhe "questions" taulukon tyhjentämisessä:',
+            truncateError,
+          );
           resolve(false);
         } else {
-          console.log('Questions-taulukko tyhjennetty.');
+          console.log("Questions-taulukko tyhjennetty.");
           resolve(true);
         }
       });
     });
   } catch (error) {
-    console.error('Tapahtui virhe:', error);
+    console.error("Tapahtui virhe:", error);
   }
 }
 
@@ -91,45 +98,67 @@ async function insertQuestionsAndAnswersIntoQuestionsTable(questions, answers) {
       ...answers.map((answer) => [null, answer, "Vastaus"]),
     ];
 
-    const insertQuery = 'INSERT INTO questions (id, text, type) VALUES ?';
+    const insertQuery = "INSERT INTO questions (id, text, type) VALUES ?";
 
     await new Promise((resolve) => {
       db.query(insertQuery, [values], (insertError) => {
         if (insertError) {
-          console.error('Error inserting questions and answers into questions table:', insertError);
+          console.error(
+            "Error inserting questions and answers into questions table:",
+            insertError,
+          );
           resolve(false);
         } else {
-          console.log('Questions and answers inserted into questions table');
+          console.log("Questions and answers inserted into questions table");
           resolve(true);
         }
       });
     });
   } catch (error) {
-    console.error('Error inserting questions and answers into questions table:', error);
+    console.error(
+      "Error inserting questions and answers into questions table:",
+      error,
+    );
   }
 }
-      async function insertAnswerOption(optionText, questionIndex, optionIndex) {
-        if (optionText !== null && optionText !== '') {
-          const insertAnswerQuery = 'INSERT INTO answers (option_text, question_id) VALUES (?, ?)';
-          db.query(insertAnswerQuery, [optionText, questionIndex + 1], (insertError) => {
-            if (insertError) {
-              console.error(`Virhe vastausvaihtoehdon lisäämisessä kysymykselle ${questionIndex + 1}, vaihtoehto ${optionIndex}:`, insertError);
-            } else {
-              console.log(`Vastausvaihtoehto ${optionText} lisätty kysymykselle ${questionIndex + 1}`);
-            }
-          });
+async function insertAnswerOption(optionText, questionIndex, optionIndex) {
+  if (optionText !== null && optionText !== "") {
+    const insertAnswerQuery =
+      "INSERT INTO answers (option_text, question_id) VALUES (?, ?)";
+    db.query(
+      insertAnswerQuery,
+      [optionText, questionIndex + 1],
+      (insertError) => {
+        if (insertError) {
+          console.error(
+            `Virhe vastausvaihtoehdon lisäämisessä kysymykselle ${questionIndex + 1}, vaihtoehto ${optionIndex}:`,
+            insertError,
+          );
         } else {
-          console.warn(`Ohitettiin NULL- tai tyhjän vastausvaihtoehdon lisääminen kysymykselle ${questionIndex + 1}, vaihtoehto ${optionIndex}`);
+          console.log(
+            `Vastausvaihtoehto ${optionText} lisätty kysymykselle ${questionIndex + 1}`,
+          );
         }
-      }
+      },
+    );
+  } else {
+    console.warn(
+      `Ohitettiin NULL- tai tyhjän vastausvaihtoehdon lisääminen kysymykselle ${questionIndex + 1}, vaihtoehto ${optionIndex}`,
+    );
+  }
+}
 
 async function fetchAndInsertQuestionsAndAnswersFromExcel() {
   try {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile('matrix.xlsx');
+    await workbook.xlsx.readFile("matrix.xlsx");
     const worksheet = workbook.getWorksheet(1);
 
-    for (let columnIndex = 1; columnIndex <= worksheet.actualColumnCount; columnIndex++) {
+    for (
+      let columnIndex = 1;
+      columnIndex <= worksheet.actualColumnCount;
+      columnIndex++
+    ) {
       worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
         if (rowNumber === 1) return;
         const optionText = row.getCell(columnIndex).value;
@@ -138,9 +167,9 @@ async function fetchAndInsertQuestionsAndAnswersFromExcel() {
       });
     }
 
-    console.log('Answers inserted into the database');
+    console.log("Answers inserted into the database");
   } catch (error) {
-    console.error('Error fetching and inserting answers from Excel:', error);
+    console.error("Error fetching and inserting answers from Excel:", error);
   }
 }
 
@@ -163,7 +192,7 @@ async function createMatrixColumns(questions, answers) {
     await new Promise((resolve) => {
       db.query(createMatrixColumnQuery, async (createColumnError) => {
         if (createColumnError) {
-          console.error('Error creating matrix column:', createColumnError);
+          console.error("Error creating matrix column:", createColumnError);
           resolve(false);
         } else {
           newEntries.push(columnName);
@@ -180,7 +209,7 @@ async function createMatrixColumns(questions, answers) {
 async function insertMatrixDataFromExcel(questions, answers) {
   try {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile('matrix.xlsx');
+    await workbook.xlsx.readFile("matrix.xlsx");
     const worksheet = workbook.getWorksheet(2);
 
     const insertPromises = [];
@@ -195,19 +224,24 @@ async function insertMatrixDataFromExcel(questions, answers) {
         values.push(valueToInsert || null);
       }
 
-      if (values.some((value) => value !== null && value !== '')) {
+      if (values.some((value) => value !== null && value !== "")) {
         const columnNames = [
           ...questions.map((_, index) => `kysymys_${index + 1}`),
-          ...answers.map((_, index) => `vastaus_${questions.length + index + 1}`)
-        ].join(', ');
+          ...answers.map(
+            (_, index) => `vastaus_${questions.length + index + 1}`,
+          ),
+        ].join(", ");
 
-        const placeholders = new Array(values.length).fill('?').join(', ');
+        const placeholders = new Array(values.length).fill("?").join(", ");
         const insertDataQuery = `INSERT INTO matrix (${columnNames}) VALUES (${placeholders})`;
 
         const insertPromise = new Promise((resolve) => {
           db.query(insertDataQuery, values, (insertDataError) => {
             if (insertDataError) {
-              console.error(`Error inserting data for row ${rowIndex}:`, insertDataError);
+              console.error(
+                `Error inserting data for row ${rowIndex}:`,
+                insertDataError,
+              );
               resolve(false);
             } else {
               console.log(`Data inserted for row ${rowIndex}`);
@@ -221,9 +255,9 @@ async function insertMatrixDataFromExcel(questions, answers) {
     }
 
     await Promise.all(insertPromises);
-    console.log('Matrix data inserted into the database');
+    console.log("Matrix data inserted into the database");
   } catch (error) {
-    console.error('Error inserting matrix data from Excel:', error);
+    console.error("Error inserting matrix data from Excel:", error);
   }
 }
 
@@ -233,11 +267,11 @@ async function Mörönheräys() {
     const answers = [];
     let firstRow;
     let worksheet;
-    
+
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile('matrix.xlsx');
+    await workbook.xlsx.readFile("matrix.xlsx");
     worksheet = workbook.getWorksheet(2);
-    
+
     worksheet.getRow(1).eachCell((cell) => {
       const question = cell.value;
       if (question.endsWith("?")) {
@@ -247,29 +281,29 @@ async function Mörönheräys() {
       }
       firstRow = firstRow || worksheet.getRow(1);
     });
-    
+
     await dropMatrixTable();
     await recreateMatrixTable();
     await truncateQuestionsTable();
     await truncateAnswersTable();
-    console.log(questions)
-    console.log(answers)
+    console.log(questions);
+    console.log(answers);
     insertQuestionsAndAnswersIntoQuestionsTable(questions, answers);
-    fetchAndInsertQuestionsAndAnswersFromExcel()
-    await createMatrixColumns(questions, answers)
-    insertMatrixDataFromExcel(questions, answers)
+    fetchAndInsertQuestionsAndAnswersFromExcel();
+    await createMatrixColumns(questions, answers);
+    insertMatrixDataFromExcel(questions, answers);
   } catch (error) {
-    console.error('Virhe Mörönheräyksen aikana:', error);
+    console.error("Virhe Mörönheräyksen aikana:", error);
   }
 }
 
 Mörönheräys();
 
 const SelectFromRunko = (callback) => {
-  const sql = 'SELECT * FROM runko';
+  const sql = "SELECT * FROM runko";
   db.query(sql, (err, tulokset) => {
     if (err) {
-      console.error('Virhe datan hakemisessa tietokannasta:', err);
+      console.error("Virhe datan hakemisessa tietokannasta:", err);
       callback(err, null);
       return;
     }
@@ -278,11 +312,11 @@ const SelectFromRunko = (callback) => {
 };
 
 const SelectFromRunkoById = (runkoId, callback) => {
-  const sql = 'SELECT * FROM runko WHERE id = ?';
+  const sql = "SELECT * FROM runko WHERE id = ?";
   const values = [runkoId];
   db.query(sql, values, (err, result) => {
     if (err) {
-      console.error('Virhe datan hakemisessa ID:n perusteella:', err);
+      console.error("Virhe datan hakemisessa ID:n perusteella:", err);
       callback(err, null);
       return;
     }
@@ -293,13 +327,14 @@ const SelectFromRunkoById = (runkoId, callback) => {
     const runkoData = result[0];
     callback(null, runkoData);
   });
-}
+};
 
 const SelectFromSisaltoByRunkoId = (runkoId, callback) => {
-  const sql = 'SELECT * FROM sisalto WHERE runko_id = ?  ORDER BY jarjestysNro ASC';
+  const sql =
+    "SELECT * FROM sisalto WHERE runko_id = ?  ORDER BY jarjestysNro ASC";
   db.query(sql, [runkoId], (err, tulokset) => {
     if (err) {
-      console.error('Virhe sisällön hakemisessa:', err);
+      console.error("Virhe sisällön hakemisessa:", err);
       callback(err, null);
       return;
     }
@@ -308,10 +343,10 @@ const SelectFromSisaltoByRunkoId = (runkoId, callback) => {
 };
 
 const SelectFromSisaltoByOtsikko = (otsikko, callback) => {
-  const sql = 'SELECT id, otsikko, kentta FROM sisalto WHERE otsikko = ?';
+  const sql = "SELECT id, otsikko, kentta FROM sisalto WHERE otsikko = ?";
   db.query(sql, [otsikko], (err, tulokset) => {
     if (err) {
-      console.error('Virhe sisällön hakemisessa:', err);
+      console.error("Virhe sisällön hakemisessa:", err);
       callback(err, null);
       return;
     }
@@ -320,10 +355,13 @@ const SelectFromSisaltoByOtsikko = (otsikko, callback) => {
 };
 
 const SelectFromPainikeBySisaltoId = (sisaltoId, callback) => {
-  const sql = 'SELECT * FROM painike WHERE sisalto_id = ?';
+  const sql = "SELECT * FROM painike WHERE sisalto_id = ?";
   db.query(sql, [sisaltoId], (err, tulokset) => {
     if (err) {
-      console.error('Virhe painikkeiden hakemisessa sisalto_id:n perusteella:', err);
+      console.error(
+        "Virhe painikkeiden hakemisessa sisalto_id:n perusteella:",
+        err,
+      );
       callback(err, null);
       return;
     }
@@ -344,19 +382,19 @@ function SelectFromSisaltoById(id, callback) {
 }
 
 const SelectNimikeFromRunko = (callback) => {
-  const sql = 'SELECT nimike FROM runko ORDER BY id DESC LIMIT 1';
+  const sql = "SELECT nimike FROM runko ORDER BY id DESC LIMIT 1";
   db.query(sql, (err, result) => {
     if (err) {
-      console.error('Virhe uusimman nimikkeen hakemisessa:', err);
+      console.error("Virhe uusimman nimikkeen hakemisessa:", err);
       callback(err, null);
       return;
     }
-    callback(null, result[0] ? result[0].nimike : '');
+    callback(null, result[0] ? result[0].nimike : "");
   });
 };
 
 const SelectFromSisalto = (callback) => {
-  const sql = 'SELECT otsikko FROM sisalto ORDER BY id DESC LIMIT 1';
+  const sql = "SELECT otsikko FROM sisalto ORDER BY id DESC LIMIT 1";
   db.query(sql, (err, result) => {
     if (err) {
       callback(err, null);
@@ -367,7 +405,8 @@ const SelectFromSisalto = (callback) => {
 };
 
 const getOtsikkoByRunkoId = (runko_id, callback) => {
-  const sql = 'SELECT id, otsikko, jarjestysNro FROM sisalto WHERE runko_id = ? ORDER BY jarjestysNro ASC';
+  const sql =
+    "SELECT id, otsikko, jarjestysNro FROM sisalto WHERE runko_id = ? ORDER BY jarjestysNro ASC";
   db.query(sql, [runko_id], (err, result) => {
     if (err) {
       callback(err, null);
@@ -378,10 +417,10 @@ const getOtsikkoByRunkoId = (runko_id, callback) => {
 };
 
 const insertTitle = (titleText, callback) => {
-  const sql = 'INSERT INTO runko (nimike) VALUES (?)';
+  const sql = "INSERT INTO runko (nimike) VALUES (?)";
   db.query(sql, [titleText], (err, result) => {
     if (err) {
-      console.error('Virhe nimikkeen lisäämisessä:', err);
+      console.error("Virhe nimikkeen lisäämisessä:", err);
       callback(err, null);
       return;
     }
@@ -390,21 +429,22 @@ const insertTitle = (titleText, callback) => {
 };
 
 const createOrUpdateOtsikko = (text, runko_id, callback) => {
-  const insertSql = 'INSERT INTO sisalto (otsikko, runko_id) VALUES (?, ?)';
+  const insertSql = "INSERT INTO sisalto (otsikko, runko_id) VALUES (?, ?)";
   db.query(insertSql, [text, runko_id], (err) => {
     if (err) {
       callback(err, null);
       return;
     }
-    callback(null, 'Otsikko luotu onnistuneesti');
+    callback(null, "Otsikko luotu onnistuneesti");
   });
 };
 
 const insertPainike = (sisaltoId, nimi, destinationId, callback) => {
-  const sql = 'INSERT INTO painike (sisalto_id, nimi, destination_id) VALUES (?, ?, ?)';
+  const sql =
+    "INSERT INTO painike (sisalto_id, nimi, destination_id) VALUES (?, ?, ?)";
   db.query(sql, [sisaltoId, nimi, destinationId], (err, result) => {
     if (err) {
-      console.error('Virhe painikkeen lisäämisessä:', err);
+      console.error("Virhe painikkeen lisäämisessä:", err);
       callback(err, null);
       return;
     }
@@ -413,42 +453,43 @@ const insertPainike = (sisaltoId, nimi, destinationId, callback) => {
 };
 
 const haeSisaltoOptions = (callback) => {
-  const sql = 'SELECT s.id, s.runko_id, s.otsikko, r.nimike AS runko_nimi FROM sisalto AS s JOIN runko AS r ON s.runko_id = r.id';
+  const sql =
+    "SELECT s.id, s.runko_id, s.otsikko, r.nimike AS runko_nimi FROM sisalto AS s JOIN runko AS r ON s.runko_id = r.id";
   db.query(sql, (err, tulokset) => {
     if (err) {
-      console.error('Virhe sisältövaihtoehtojen hakemisessa:', err);
+      console.error("Virhe sisältövaihtoehtojen hakemisessa:", err);
       callback(err, null);
       return;
     }
-    console.log('Sisältövaihtoehdot haettu onnistuneesti:', tulokset);
+    console.log("Sisältövaihtoehdot haettu onnistuneesti:", tulokset);
     callback(null, tulokset);
   });
 };
 
 const getKenttaContent = (Id, callback) => {
-  const sql = 'SELECT kentta FROM sisalto WHERE id = ?';
+  const sql = "SELECT kentta FROM sisalto WHERE id = ?";
   db.query(sql, [Id], (err, result) => {
     if (err) {
-      console.error('Virhe kenttäsisällön hakemisessa:', err);
+      console.error("Virhe kenttäsisällön hakemisessa:", err);
       callback(err, null);
       return;
     }
     if (result.length === 0) {
-      console.log('Kenttäsisältöä ei löytynyt ID:llä:', Id);
+      console.log("Kenttäsisältöä ei löytynyt ID:llä:", Id);
       callback(null, null);
       return;
     }
     const kenttaContent = result[0].kentta;
-    console.log('Haettu kenttäsisältö:', kenttaContent);
+    console.log("Haettu kenttäsisältö:", kenttaContent);
     callback(null, kenttaContent);
   });
 };
 
 const updateTitle = (id, newText, callback) => {
-  const sql = 'UPDATE runko SET nimike = ? WHERE id = ?';
+  const sql = "UPDATE runko SET nimike = ? WHERE id = ?";
   db.query(sql, [newText, id], (err, result) => {
     if (err) {
-      console.error('Virhe nimikkeen päivittämisessä:', err);
+      console.error("Virhe nimikkeen päivittämisessä:", err);
       callback(err, null);
       return;
     }
@@ -457,26 +498,34 @@ const updateTitle = (id, newText, callback) => {
 };
 
 const editPainike = async (id, nimi, destinationId) => {
-  console.log('Saatu tiedot painikkeen muokkaamiseen:', { id, nimi, destinationId });
-  const updateSql = 'UPDATE painike SET nimi = ?, destination_id = ? WHERE id = ?';
+  console.log("Saatu tiedot painikkeen muokkaamiseen:", {
+    id,
+    nimi,
+    destinationId,
+  });
+  const updateSql =
+    "UPDATE painike SET nimi = ?, destination_id = ? WHERE id = ?";
   const updateValues = [nimi, destinationId, id];
   return new Promise((resolve, reject) => {
     db.query(updateSql, updateValues, (err, result) => {
       if (err) {
-        console.error('Virhe painikkeen muokkaamisessa:', err);
+        console.error("Virhe painikkeen muokkaamisessa:", err);
         reject(err);
         return;
       }
-      console.log('Painiketta on muokattu onnistuneesti. Tulos:', result);
-      const selectSql = 'SELECT * FROM painike WHERE id = ?';
+      console.log("Painiketta on muokattu onnistuneesti. Tulos:", result);
+      const selectSql = "SELECT * FROM painike WHERE id = ?";
       db.query(selectSql, [id], (selectErr, selectResult) => {
         if (selectErr) {
-          console.error('Virhe päivitettyjen painiketietojen hakemisessa:', selectErr);
+          console.error(
+            "Virhe päivitettyjen painiketietojen hakemisessa:",
+            selectErr,
+          );
           reject(selectErr);
           return;
         }
         const updatedPainike = selectResult[0];
-        console.log('Päivitetyt painiketiedot:', updatedPainike);
+        console.log("Päivitetyt painiketiedot:", updatedPainike);
         resolve(updatedPainike);
       });
     });
@@ -484,11 +533,11 @@ const editPainike = async (id, nimi, destinationId) => {
 };
 
 const updateRichTextForOtsikko = (otsikkoId, richText, callback) => {
-  const sql = 'UPDATE sisalto SET kentta = ? WHERE id = ?';
-  console.log('Rikas teksti:', richText);
+  const sql = "UPDATE sisalto SET kentta = ? WHERE id = ?";
+  console.log("Rikas teksti:", richText);
   db.query(sql, [richText, otsikkoId], (err, result) => {
     if (err) {
-      console.error('Virhe rikkaan tekstin päivittämisessä otsikolle:', err);
+      console.error("Virhe rikkaan tekstin päivittämisessä otsikolle:", err);
       callback(err, null);
       return;
     }
@@ -499,10 +548,10 @@ const updateRichTextForOtsikko = (otsikkoId, richText, callback) => {
 const updateOtsikkoOrder = async (otsikkos) => {
   try {
     const updateQueries = otsikkos.map((otsikko) => {
-      return db.query(
-        'UPDATE sisalto SET jarjestysNro = ? WHERE id = ?',
-        [otsikko.order, otsikko.id]
-      );
+      return db.query("UPDATE sisalto SET jarjestysNro = ? WHERE id = ?", [
+        otsikko.order,
+        otsikko.id,
+      ]);
     });
     await Promise.all(updateQueries);
   } catch (error) {
@@ -511,10 +560,10 @@ const updateOtsikkoOrder = async (otsikkos) => {
 };
 
 const updateOtsikko = (id, text, callback) => {
-  const sql = 'UPDATE sisalto SET otsikko = ? WHERE id = ?';
+  const sql = "UPDATE sisalto SET otsikko = ? WHERE id = ?";
   db.query(sql, [text, id], (err, result) => {
     if (err) {
-      console.error('Virhe otsikon päivittämisessä:', err);
+      console.error("Virhe otsikon päivittämisessä:", err);
       callback(err, null);
       return;
     }
@@ -523,11 +572,11 @@ const updateOtsikko = (id, text, callback) => {
 };
 
 const deleteNimikeById = (id, callback) => {
-  const sql = 'DELETE FROM runko WHERE id = ?';
+  const sql = "DELETE FROM runko WHERE id = ?";
   const values = [id];
   db.query(sql, values, (err, result) => {
     if (err) {
-      console.error('Virhe nimikkeen poistamisessa:', err);
+      console.error("Virhe nimikkeen poistamisessa:", err);
       callback(err, null);
       return;
     }
@@ -536,25 +585,25 @@ const deleteNimikeById = (id, callback) => {
 };
 
 const deletePainike = (id, callback) => {
-  console.log('Poistetaan painike ID:llä:', id);
-  const sql = 'DELETE FROM painike WHERE id = ?';
+  console.log("Poistetaan painike ID:llä:", id);
+  const sql = "DELETE FROM painike WHERE id = ?";
   const values = [id];
   db.query(sql, values, (err, result) => {
     if (err) {
-      console.error('Virhe painikkeen poistamisessa:', err);
+      console.error("Virhe painikkeen poistamisessa:", err);
       callback(err, null);
       return;
     }
-    console.log('Painike on poistettu onnistuneesti. Tulos:', result);
+    console.log("Painike on poistettu onnistuneesti. Tulos:", result);
     callback(null, result);
   });
 };
 
 const deleteOtsikko = (otsikkoId, callback) => {
-  const sql = 'DELETE FROM sisalto WHERE id = ?';
+  const sql = "DELETE FROM sisalto WHERE id = ?";
   db.query(sql, [otsikkoId], (err, result) => {
     if (err) {
-      console.error('Virhe otsikon poistamisessa tietokannasta:', err);
+      console.error("Virhe otsikon poistamisessa tietokannasta:", err);
       callback(err, null);
       return;
     }
@@ -566,7 +615,7 @@ const SelectFromQuestions = (callback) => {
   const sql = 'SELECT * FROM questions WHERE type = "Kysymys"';
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Virhe datan hakemisessa tietokannasta:', err);
+      console.error("Virhe datan hakemisessa tietokannasta:", err);
       callback(err, null);
       return;
     }
@@ -578,7 +627,7 @@ const SelectFromQuestionsAnswers = (callback) => {
   const sql = 'SELECT * FROM questions WHERE type = "Vastaus"';
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Virhe datan hakemisessa tietokannasta:', err);
+      console.error("Virhe datan hakemisessa tietokannasta:", err);
       callback(err, null);
       return;
     }
@@ -587,10 +636,10 @@ const SelectFromQuestionsAnswers = (callback) => {
 };
 
 const SelectAllAnswers = (callback) => {
-  const sql = 'SELECT * FROM answers';
+  const sql = "SELECT * FROM answers";
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Virhe datan hakemisessa tietokannasta:', err);
+      console.error("Virhe datan hakemisessa tietokannasta:", err);
       callback(err, null);
       return;
     }
@@ -601,7 +650,7 @@ const SelectAllAnswers = (callback) => {
 const ExecuteMatrixQuery = (sql, callback) => {
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Virhe mukautetun kyselyn suorittamisessa:', err);
+      console.error("Virhe mukautetun kyselyn suorittamisessa:", err);
       callback(err, null);
       return;
     }

@@ -1,19 +1,19 @@
-import React from 'react';
+import React from "react";
 
 const PlusIcon = ({ onClick }) => {
   return (
     <div
       style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
       }}
     >
       <div
         style={{
-          fontSize: '4rem',
-          cursor: 'pointer',
+          fontSize: "4rem",
+          cursor: "pointer",
         }}
         onClick={onClick}
       >

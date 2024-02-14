@@ -1,26 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import axios from 'axios';
-import '../css/TextEditor.css';
+import React, { useState, useEffect, useRef } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import axios from "axios";
+import "../css/TextEditor.css";
 
 const editorContainerStyle = {
-  width: '80%',
-  margin: '0 auto',
-  position: 'relative',
+  width: "80%",
+  margin: "0 auto",
+  position: "relative",
 };
 
 const textEditorStyle = {
-  width: '100%',
-  height: 'calc(100% - 40px)',
+  width: "100%",
+  height: "calc(100% - 40px)",
 };
 
-const customFontSizes = [
-  'small', 'normal', 'large', 'huge',
-];
+const customFontSizes = ["small", "normal", "large", "huge"];
 
 const TextEditor = ({ otsikkoId, kenttaContent }) => {
-  const [richText, setRichText] = useState(kenttaContent || '');
+  const [richText, setRichText] = useState(kenttaContent || "");
   const quillRef = useRef(null);
 
   useEffect(() => {
@@ -39,30 +37,31 @@ const TextEditor = ({ otsikkoId, kenttaContent }) => {
 
   const saveRichText = async () => {
     try {
-      console.log('Sending richText data to server:', richText);
-      await axios.post(`http://localhost:3001/api/save-rich-text/${otsikkoId}`, {
-        richText,
-      });
-      console.log('Rich text content saved successfully');
+      console.log("Sending richText data to server:", richText);
+      await axios.post(
+        `http://localhost:3001/api/save-rich-text/${otsikkoId}`,
+        {
+          richText,
+        },
+      );
+      console.log("Rich text content saved successfully");
     } catch (error) {
-      console.error('Error saving rich text content:', error);
+      console.error("Error saving rich text content:", error);
     }
   };
-
-
 
   const modules = {
     toolbar: {
       container: [
-        [{ header: '1' }, { header: '2' }, { font: [] }],
-        [{ 'size': ['small', false, 'large', 'huge'] }],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        ['bold', 'italic', 'underline', 'strike'],
+        [{ header: "1" }, { header: "2" }, { font: [] }],
+        [{ size: ["small", false, "large", "huge"] }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["bold", "italic", "underline", "strike"],
         [{ align: [] }],
-        ['link', 'image'],
-        ['blockquote', 'code-block'],
+        ["link", "image"],
+        ["blockquote", "code-block"],
         [{ color: [] }, { background: [] }],
-        ['clean'],
+        ["clean"],
       ],
     },
   };
@@ -77,7 +76,7 @@ const TextEditor = ({ otsikkoId, kenttaContent }) => {
         modules={modules}
         ref={quillRef}
       />
-     <button
+      <button
         onClick={() => {
           saveRichText();
           handleLogHtml();

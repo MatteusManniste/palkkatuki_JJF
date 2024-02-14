@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
 const Nimike = ({ onTitleCreated }) => {
-  const [titleText, setTitleText] = useState('');
-  const [newTitle, setNewTitle] = useState('');
+  const [titleText, setTitleText] = useState("");
+  const [newTitle, setNewTitle] = useState("");
   const [editing, setEditing] = useState(false);
 
   const handleTitleSubmit = async () => {
@@ -17,20 +17,22 @@ const Nimike = ({ onTitleCreated }) => {
 
         setNewTitle(titleText);
 
-        console.log('Title updated successfully');
+        console.log("Title updated successfully");
       } else {
-
-        const response = await axios.post('http://localhost:3001/api/create-title', { text: titleText });
+        const response = await axios.post(
+          "http://localhost:3001/api/create-title",
+          { text: titleText },
+        );
 
         const newTitleId = response.data.id;
 
-        console.log('New Title ID:', newTitleId);
+        console.log("New Title ID:", newTitleId);
         setNewTitle(titleText);
         onTitleCreated(newTitleId);
-        setTitleText('');
+        setTitleText("");
       }
     } catch (error) {
-      console.error('Error creating/updating title:', error);
+      console.error("Error creating/updating title:", error);
     }
   };
 
@@ -50,7 +52,7 @@ const Nimike = ({ onTitleCreated }) => {
             onChange={(e) => setTitleText(e.target.value)}
           />
           <button onClick={handleTitleSubmit}>
-            {editing ? 'Update Title' : 'Create Title'}
+            {editing ? "Update Title" : "Create Title"}
           </button>
         </div>
       )}

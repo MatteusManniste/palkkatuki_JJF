@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import Lisaa from './Lisaa';
-import Editor from './Editor';
-import Runko from './Runko';
+import React, { useState } from "react";
+import Lisaa from "./Lisaa";
+import Editor from "./Editor";
+import Runko from "./Runko";
 
 const Hallintapaneeli = () => {
   const [showEditor, setShowEditor] = useState(false);
@@ -12,11 +12,9 @@ const Hallintapaneeli = () => {
   };
 
   return (
-    <div
-    >
+    <div>
       {!showEditor ? (
-        <div
-        >
+        <div>
           <Runko editMode={editMode} />
         </div>
       ) : null}
