@@ -160,7 +160,6 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
       setNimi(selectedPainike.nimi);
       setDestinationId(selectedPainike.destinationId);
       setSelectedPainikeId(painikeId);
-      selectRef.current.value = selectedPainike.destination_id;
     }
   };
 
@@ -184,6 +183,15 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   };
 
   console.log("Runko-nimikartoitus:", runkoNameMapping);
+
+  useEffect(() => {
+    const test = createdPainikes.filter((painike) => painike.id === selectedPainikeId);
+
+    if (selectRef.current) {
+      // autopick destination on button click
+      selectRef.current.value = test[0]?.destination_id;
+    }
+  }, [createdPainikes, selectedPainikeId]);
 
   return (
     <div>
