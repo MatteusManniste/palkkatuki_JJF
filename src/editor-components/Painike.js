@@ -57,7 +57,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   const [runkoNameMapping, setRunkoNameMapping] = useState({});
   const [updatedPainike, setUpdatedPainike] = useState(null);
 
-  const selectRef = useRef(null);
+  const destinationSelectRef = useRef(null);
 
   const fetchSisaltoOptions = async () => {
     try {
@@ -185,11 +185,12 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   console.log("Runko-nimikartoitus:", runkoNameMapping);
 
   useEffect(() => {
-    const test = createdPainikes.filter((painike) => painike.id === selectedPainikeId);
+    // find the correct clicked button data object based on it's id
+    const filteredPainikes = createdPainikes.filter((painike) => painike.id === selectedPainikeId);
 
-    if (selectRef.current) {
+    if (destinationSelectRef.current) {
       // autopick destination on button click
-      selectRef.current.value = test[0]?.destination_id;
+      destinationSelectRef.current.value = filteredPainikes[0]?.destination_id;
     }
   }, [createdPainikes, selectedPainikeId]);
 
@@ -209,7 +210,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
             onChange={(e) => setNimi(e.target.value)}
           />
           <select
-            ref={selectRef}
+            ref={destinationSelectRef}
             value={destinationId}
             onChange={(e) => setDestinationId(e.target.value)}
           >
