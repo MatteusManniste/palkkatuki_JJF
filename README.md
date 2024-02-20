@@ -1,3 +1,7 @@
+# IMPORTANT!
+
+Do not store passwords in the database as plain text! Go to [Bcrypt Generator](https://bcrypt-generator.com/) and encrypt your passwords before storing them.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
