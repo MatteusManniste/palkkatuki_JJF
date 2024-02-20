@@ -8,7 +8,7 @@ const Painike = ({ sisaltoId }) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/painike/${sisaltoId}`)
+      .get(`http://localhost:3001/api/painike/${sisaltoId}`, { withCredentials: true })
       .then((response) => {
         console.log("API Vastaus:", response.data);
         setPainikes(response.data);

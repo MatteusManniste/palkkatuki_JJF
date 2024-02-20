@@ -11,7 +11,7 @@ const Sisalto = ({ runkoId }) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/sisalto/runko/${runkoId}`)
+      .get(`http://localhost:3001/api/sisalto/runko/${runkoId}`, { withCredentials: true })
       .then((response) => {
         console.log("API-vastaus:", response.data);
         setSisalto(response.data);

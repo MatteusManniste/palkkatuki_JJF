@@ -1,0 +1,32 @@
+.logout-button {}
+
+.login,
+.logout {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+    gap: 0.25rem 0;
+}
+
+.login-title,
+.logout-title {
+    display: flex;
+    align-self: center;
+}
+
+.login-username,
+.login-password {
+    font-size: 14px;
+}
+
+.login-error {
+    font-size: 14px;
+    color: #aa0000;
+}
+
+.login-button {
+    font-size: 14px;
+    height: 32px;
+}

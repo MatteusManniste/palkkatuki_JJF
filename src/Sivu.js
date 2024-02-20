@@ -16,7 +16,7 @@ const Sivu = () => {
   useEffect(() => {
     console.log("Pyydetään API:sta id:llä:", otsikko);
     axios
-      .get(`http://localhost:3001/api/sisalto/id/${otsikko}`)
+      .get(`http://localhost:3001/api/sisalto/id/${otsikko}`, { withCredentials: true })
       .then((response) => {
         console.log("API-vastaus:", response.data);
         setContent(response.data);

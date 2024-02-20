@@ -48,18 +48,8 @@ const Laskuri = () => {
 
   const constructAndExecuteQuery = () => {
     if (questions.length > 0 && areAllQuestionsAnswered()) {
-      const answerTexts = Object.values(selectedAnswers).map(
-        (selectedAnswer) => selectedAnswer.optionText,
-      );
-
-      const conditions = questions.map((question, index) => {
-        return `kysymys_${index + 1} = '${answerTexts[index]}'`;
-      });
-
-      const query = `SELECT * FROM matrix WHERE ${conditions.join(" AND ")}`;
-
       axios
-        .post("http://localhost:3001/api/matrix/query", { sql: query })
+        .post("http://localhost:3001/api/matrix/query", { questions: questions, selectedAnswers: selectedAnswers }, { withCredentials: true })
         .then((response) => {
           const resultData = response.data;
 
@@ -90,7 +80,7 @@ const Laskuri = () => {
 
   const fetchAndLogVastausData = () => {
     axios
-      .get("http://localhost:3001/api/vastaus")
+      .get("http://localhost:3001/api/vastaus", { withCredentials: true })
       .then((response) => {
         console.log('Response from "Vastaus" API:', response.data);
         setVastausData(response.data);

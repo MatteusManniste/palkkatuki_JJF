@@ -1,22 +1,106 @@
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const app = express();
 const port = process.env.PORT || 3001;
-
 const Data = require("./data");
+const cookieParser = require("cookie-parser");
+const bcrypt = require("bcrypt");
+
+app.use(cookieParser());
 
 app.use(express.json());
 
-app.use(cors());
-
 const corsOptions = {
   origin: "http://localhost:3000",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+
+const middleware = (req, res, next) => {
+  try {
+    const token = req.cookies.token;
+
+    // this method throws errors if logins are invalid.
+    jwt.verify(token, process.env.JWT_SECRET);
+
+    // if verification went through, we can set this to quickly get our auth status in subsequent requests.
+    req.isAuth = true;
+
+    // no errors means that the token was created by us, allow this request.
+    next();
+  } catch (error) {
+    // errors here are either that the token didn't exist, was invalid, or expired. 
+    // either way, let's clear it to force the user to login again.
+    console.error("Auth failed:", error.message);
+    req.isAuth = false;
+    res.clearCookie("token");
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
+
+app.post("/api/login", (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (username && password) {
+      Data.getUser(username, async (err, user) => {
+        if (err) {
+          console.error("Internal error:", err);
+          res.status(500).json({ error: "Internal error" });
+          return;
+        }
+
+        if (!user) {
+          console.error("Invalid logins");
+          res.status(400).json({ error: "Invalid logins" });
+          return;
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password);
+
+        if (validPassword) {
+          // TODO: maybe pull in some of the user's data from database?
+          const jwtPayload = {};
+
+          const token = jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+          res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production" ? true : false,
+            maxAge: new Date(Date.now() + 3600 * 1000), // 1 hour
+          });
+
+          console.log("Successfully logged in");
+          res.json({ message: "Successfully logged in" });
+          return;
+        }
+        console.error("Invalid logins");
+        res.status(400).json({ error: "Invalid logins" });
+      });
+    } else {
+      console.error("Invalid logins");
+      res.status(400).json({ error: "Invalid logins" });
+    }
+  } catch (error) {
+    console.error("Error while attempting to login:", error);
+    res.status(400).json({ error: "Invalid logins" });
+  }
+});
+
+app.get("/api/logout", (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.json({ message: "Successfully logged out" });
+    return;
+  } catch (error) {
+    res.status(500).json({ error: "Internal error" });
+  }
+});
 
 app.get("/api/runko", (req, res) => {
   try {
@@ -45,34 +129,39 @@ app.get("/api/runko/:runkoId", (req, res) => {
   });
 });
 
-app.delete("/api/delete-title/:id", (req, res) => {
-  const { id } = req.params;
-  Data.deleteNimikeById(id, (err, result) => {
+app.get("/api/questions", (req, res) => {
+  Data.SelectFromQuestions((err, data) => {
     if (err) {
-      console.error("Virhe poistettaessa Nimikettä:", err);
-      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-      return;
-    }
-    if (result.affectedRows === 0) {
-      res.status(404).json({ error: "Nimikettä ei löydy" });
-      return;
-    }
-    console.log("Nimike poistettu onnistuneesti");
-    res.status(204).send();
-  });
-});
-
-app.get("/api/sisalto/:otsikko", (req, res) => {
-  const { otsikko } = req.params;
-  Data.SelectFromSisaltoByOtsikko(otsikko, (err, data) => {
-    if (err) {
-      console.error("Virhe sisällön noutamisessa:", err);
+      console.error("Virhe datan hakemisessa:", err);
       res.status(500).json({ error: "Sisäinen palvelinvirhe" });
       return;
     }
     res.json(data);
   });
 });
+
+app.get("/api/vastaus", (req, res) => {
+  Data.SelectFromQuestionsAnswers((err, data) => {
+    if (err) {
+      console.error("Virhe datan hakemisessa:", err);
+      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+      return;
+    }
+    res.json(data);
+  });
+});
+
+app.get("/api/answers", (req, res) => {
+  Data.SelectAllAnswers((err, data) => {
+    if (err) {
+      console.error("Virhe datan hakemisessa:", err);
+      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+      return;
+    }
+    res.json(data);
+  });
+});
+
 
 app.get("/api/sisalto/runko/:runkoId", (req, res) => {
   const { runkoId } = req.params;
@@ -85,10 +174,22 @@ app.get("/api/sisalto/runko/:runkoId", (req, res) => {
   });
 });
 
-app.get("/api/painike/:sisaltoId", (req, res) => {
-  const { sisaltoId } = req.params;
-  Data.SelectFromPainikeBySisaltoId(sisaltoId, (err, data) => {
+app.post("/api/matrix/query", (req, res) => {
+  const { questions, selectedAnswers } = req.body;
+
+  const answerTexts = Object.values(selectedAnswers).map(
+    (selectedAnswer) => selectedAnswer.optionText,
+  );
+
+  const conditions = questions.map((_, index) => {
+    return `kysymys_${index + 1} = '${answerTexts[index]}'`;
+  });
+
+  const sql = `SELECT * FROM matrix WHERE ${conditions.join(" AND ")}`;
+
+  Data.ExecuteMatrixQuery(sql, (err, data) => {
     if (err) {
+      console.error("Virhe matriisin kyselyn suorittamisessa:", err);
       res.status(500).json({ error: "Sisäinen palvelinvirhe" });
       return;
     }
@@ -108,6 +209,50 @@ app.get("/api/sisalto/id/:id", (req, res) => {
   });
 });
 
+app.get("/api/painike/:sisaltoId", (req, res) => {
+  const { sisaltoId } = req.params;
+  Data.SelectFromPainikeBySisaltoId(sisaltoId, (err, data) => {
+    if (err) {
+      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+      return;
+    }
+    res.json(data);
+  });
+});
+
+
+// NOTE: middleware will only run on the routes below this line
+app.use(middleware);
+
+app.get("/api/authStatus", (req, res) => {
+  try {
+    // our middleware runs before this, 
+    // so we have access to the isAuth variable that we set in the middleware
+
+    if (req.isAuth) {
+      res.json({ isAuth: true });
+      return;
+    }
+
+    res.json({ isAuth: false });
+  } catch (error) {
+    console.error("Error while checking authStatus:", error.message);
+    res.status(500).json({ error: "Internal error", isAuth: false });
+  }
+});
+
+app.get("/api/sisalto/:otsikko", (req, res) => {
+  const { otsikko } = req.params;
+  Data.SelectFromSisaltoByOtsikko(otsikko, (err, data) => {
+    if (err) {
+      console.error("Virhe sisällön noutamisessa:", err);
+      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+      return;
+    }
+    res.json(data);
+  });
+});
+
 app.get("/api/get-new-title", (req, res) => {
   Data.SelectNimikeFromRunko((err, title) => {
     if (err) {
@@ -116,6 +261,67 @@ app.get("/api/get-new-title", (req, res) => {
       return;
     }
     res.json({ title });
+  });
+});
+
+app.get("/api/get-otsikko/:runko_id", (req, res) => {
+  const { runko_id } = req.params;
+  Data.getOtsikkoByRunkoId(runko_id, (err, data) => {
+    if (err) {
+      console.error("Virhe otsikon tietojen hakemisessa:", err);
+      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+      return;
+    }
+    res.json(data);
+  });
+});
+
+app.get("/api/get-sisalto-options", (req, res) => {
+  try {
+    Data.haeSisaltoOptions((err, sisaltoOptions) => {
+      if (err) {
+        console.error("Virhe haettaessa sisällön asetuksia:", err);
+        res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+        return;
+      }
+      res.json(sisaltoOptions);
+    });
+  } catch (error) {
+    console.error("Virhe haettaessa sisällön asetuksia:", error);
+    res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+  }
+});
+
+app.get("/api/get-kentta-content/:otsikkoId", (req, res) => {
+  const { otsikkoId } = req.params;
+  Data.getKenttaContent(parseInt(otsikkoId, 10), (err, kenttaContent) => {
+    if (err) {
+      console.error("Virhe haettaessa kenttäsisältöä:", err);
+      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+      return;
+    }
+    if (kenttaContent !== null) {
+      res.json({ kentta: kenttaContent });
+    } else {
+      res.status(404).json({ error: "Otsikkoa ei löydy" });
+    }
+  });
+});
+
+app.delete("/api/delete-title/:id", (req, res) => {
+  const { id } = req.params;
+  Data.deleteNimikeById(id, (err, result) => {
+    if (err) {
+      console.error("Virhe poistettaessa Nimikettä:", err);
+      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
+      return;
+    }
+    if (result.affectedRows === 0) {
+      res.status(404).json({ error: "Nimikettä ei löydy" });
+      return;
+    }
+    console.log("Nimike poistettu onnistuneesti");
+    res.status(204).send();
   });
 });
 
@@ -156,18 +362,6 @@ app.put("/api/update-title/:id", (req, res) => {
       return;
     }
     res.json({ message: "Nimike päivitetty onnistuneesti" });
-  });
-});
-
-app.get("/api/get-otsikko/:runko_id", (req, res) => {
-  const { runko_id } = req.params;
-  Data.getOtsikkoByRunkoId(runko_id, (err, data) => {
-    if (err) {
-      console.error("Virhe otsikon tietojen hakemisessa:", err);
-      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-      return;
-    }
-    res.json(data);
   });
 });
 
@@ -258,22 +452,6 @@ app.post("/api/create-painike", (req, res) => {
   });
 });
 
-app.get("/api/get-sisalto-options", (req, res) => {
-  try {
-    Data.haeSisaltoOptions((err, sisaltoOptions) => {
-      if (err) {
-        console.error("Virhe haettaessa sisällön asetuksia:", err);
-        res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-        return;
-      }
-      res.json(sisaltoOptions);
-    });
-  } catch (error) {
-    console.error("Virhe haettaessa sisällön asetuksia:", error);
-    res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-  }
-});
-
 app.put("/api/edit-painike/:id", async (req, res) => {
   const { id } = req.params;
   const { nimi, destinationId } = req.body;
@@ -300,22 +478,6 @@ app.delete("/api/delete-painike/:id", (req, res) => {
   });
 });
 
-app.get("/api/get-kentta-content/:otsikkoId", (req, res) => {
-  const { otsikkoId } = req.params;
-  Data.getKenttaContent(parseInt(otsikkoId, 10), (err, kenttaContent) => {
-    if (err) {
-      console.error("Virhe haettaessa kenttäsisältöä:", err);
-      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-      return;
-    }
-    if (kenttaContent !== null) {
-      res.json({ kentta: kenttaContent });
-    } else {
-      res.status(404).json({ error: "Otsikkoa ei löydy" });
-    }
-  });
-});
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
@@ -336,52 +498,6 @@ app.post("/api/upload-image", upload.single("image"), (req, res) => {
     console.error("Virhe kuvan lataamisessa:", error);
     res.status(500).json({ error: "Kuvan lataus epäonnistui" });
   }
-});
-
-app.get("/api/questions", (req, res) => {
-  Data.SelectFromQuestions((err, data) => {
-    if (err) {
-      console.error("Virhe datan hakemisessa:", err);
-      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-      return;
-    }
-    res.json(data);
-  });
-});
-
-app.get("/api/vastaus", (req, res) => {
-  Data.SelectFromQuestionsAnswers((err, data) => {
-    if (err) {
-      console.error("Virhe datan hakemisessa:", err);
-      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-      return;
-    }
-    res.json(data);
-  });
-});
-
-app.get("/api/answers", (req, res) => {
-  Data.SelectAllAnswers((err, data) => {
-    if (err) {
-      console.error("Virhe datan hakemisessa:", err);
-      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-      return;
-    }
-    res.json(data);
-  });
-});
-
-app.post("/api/matrix/query", (req, res) => {
-  const { sql } = req.body;
-
-  Data.ExecuteMatrixQuery(sql, (err, data) => {
-    if (err) {
-      console.error("Virhe matriisin kyselyn suorittamisessa:", err);
-      res.status(500).json({ error: "Sisäinen palvelinvirhe" });
-      return;
-    }
-    res.json(data);
-  });
 });
 
 app.listen(port, () => {

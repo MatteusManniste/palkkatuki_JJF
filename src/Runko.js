@@ -11,7 +11,7 @@ const Runko = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3001/api/runko")
+      .get("http://localhost:3001/api/runko", { withCredentials: true })
       .then((response) => {
         setRunkos(response.data);
       })

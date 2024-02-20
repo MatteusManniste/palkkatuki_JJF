@@ -299,6 +299,19 @@ async function Mörönheräys() {
 
 Mörönheräys();
 
+const getUser = (username, callback) => {
+  const sql = "SELECT * FROM user WHERE username = ?";
+  db.query(sql, username, (err, result) => {
+    if (err) {
+      console.error("Error executing 'getUser' query:", err);
+      callback(err, null);
+      return;
+    }
+
+    callback(null, ...result);
+  });
+};
+
 const SelectFromRunko = (callback) => {
   const sql = "SELECT * FROM runko";
   db.query(sql, (err, tulokset) => {
@@ -659,6 +672,7 @@ const ExecuteMatrixQuery = (sql, callback) => {
 };
 
 module.exports = {
+  getUser,
   SelectFromRunko,
   SelectFromRunkoById,
   SelectFromSisaltoByRunkoId,
