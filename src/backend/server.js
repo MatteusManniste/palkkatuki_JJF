@@ -48,6 +48,7 @@ app.post("/api/login", (req, res) => {
     const { username, password } = req.body;
 
     if (username && password) {
+      // attempt to get user data with given username
       Data.getUser(username, async (err, user) => {
         if (err) {
           console.error("Internal error:", err);
@@ -56,30 +57,31 @@ app.post("/api/login", (req, res) => {
         }
 
         if (!user) {
-          console.error("Invalid logins");
+          console.error("Invalid username");
           res.status(400).json({ error: "Invalid logins" });
           return;
         }
 
+        // check if given password matches the password in database
         const validPassword = await bcrypt.compare(password, user.password);
 
         if (validPassword) {
-          // TODO: maybe pull in some of the user's data from database?
+          // TODO: maybe add some user data, e.g. username to payload?
           const jwtPayload = {};
 
-          const token = jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+          const token = jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: "2h" });
 
           res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production" ? true : false,
-            maxAge: new Date(Date.now() + 3600 * 1000), // 1 hour
+            maxAge: new Date(Date.now() + 7200 * 1000), // 2 hours in milliseconds
           });
 
           console.log("Successfully logged in");
           res.json({ message: "Successfully logged in" });
           return;
         }
-        console.error("Invalid logins");
+        console.error("Invalid password");
         res.status(400).json({ error: "Invalid logins" });
       });
     } else {
@@ -87,8 +89,8 @@ app.post("/api/login", (req, res) => {
       res.status(400).json({ error: "Invalid logins" });
     }
   } catch (error) {
-    console.error("Error while attempting to login:", error);
-    res.status(400).json({ error: "Invalid logins" });
+    console.error("Error while attempting to login:", error.message);
+    res.status(500).json({ error: "Internal error" });
   }
 });
 
@@ -98,6 +100,7 @@ app.get("/api/logout", (req, res) => {
     res.json({ message: "Successfully logged out" });
     return;
   } catch (error) {
+    console.error("Error while attempting to logout:", error.message);
     res.status(500).json({ error: "Internal error" });
   }
 });
@@ -220,14 +223,13 @@ app.get("/api/painike/:sisaltoId", (req, res) => {
   });
 });
 
-
 // NOTE: middleware will only run on the routes below this line
 app.use(middleware);
 
 app.get("/api/authStatus", (req, res) => {
   try {
     // our middleware runs before this, 
-    // so we have access to the isAuth variable that we set in the middleware
+    // meaning we have access to the isAuth variable
 
     if (req.isAuth) {
       res.json({ isAuth: true });

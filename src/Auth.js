@@ -50,6 +50,7 @@ const Auth = () => {
             name="username"
             placeholder="Käyttäjätunnus..."
             autoComplete="off"
+            required
             onInput={() => setError("")}
           />
           <input
@@ -58,6 +59,7 @@ const Auth = () => {
             name="password"
             placeholder="Salasana..."
             autoComplete="off"
+            required
             onInput={() => setError("")}
           />
           <span className="login-error">{error}</span>
