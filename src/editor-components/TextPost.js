@@ -13,7 +13,7 @@ const TextPost = ({ otsikko }) => {
         `http://localhost:3001/api/save-rich-text/${otsikko.id}`,
         {
           richText,
-        },
+        }, { withCredentials: true }
       );
 
       console.log("Rich text content saved successfully");

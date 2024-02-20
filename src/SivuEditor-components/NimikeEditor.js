@@ -15,7 +15,7 @@ const NimikeEditor = () => {
   useEffect(() => {
     if (id) {
       axios
-        .get(`http://localhost:3001/api/runko/${id}`)
+        .get(`http://localhost:3001/api/runko/${id}`, { withCredentials: true })
         .then((response) => {
           const updatedNimike = response.data.nimike;
           setTitleText(updatedNimike);
@@ -43,7 +43,7 @@ const NimikeEditor = () => {
 
     if (shouldDelete) {
       axios
-        .delete(`http://localhost:3001/api/delete-title/${id}`)
+        .delete(`http://localhost:3001/api/delete-title/${id}`, { withCredentials: true })
         .then(() => {
           console.log("Nimike deleted successfully");
           navigate("/hallintapaneeli");

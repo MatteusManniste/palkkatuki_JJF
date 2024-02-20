@@ -11,7 +11,7 @@ const Nimike = ({ onTitleCreated }) => {
       if (editing) {
         await axios.put(`http://localhost:3001/api/update-title/:id`, {
           newText: titleText,
-        });
+        }, { withCredentials: true });
 
         setEditing(false);
 
@@ -22,6 +22,7 @@ const Nimike = ({ onTitleCreated }) => {
         const response = await axios.post(
           "http://localhost:3001/api/create-title",
           { text: titleText },
+          { withCredentials: true }
         );
 
         const newTitleId = response.data.id;

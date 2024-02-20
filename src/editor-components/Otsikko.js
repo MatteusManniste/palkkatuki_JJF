@@ -20,6 +20,7 @@ const Otsikko = ({ nimikeId }) => {
     try {
       const response = await axios.get(
         `http://localhost:3001/api/get-otsikko/${nimikeId}`,
+        { withCredentials: true }
       );
 
       const initialOtsikkoData = response.data.map((otsikko, index) => ({
@@ -62,6 +63,7 @@ const Otsikko = ({ nimikeId }) => {
       await axios.put(
         "http://localhost:3001/api/update-otsikko-order",
         newData,
+        { withCredentials: true }
       );
 
       console.log("Order updated successfully");
@@ -76,13 +78,13 @@ const Otsikko = ({ nimikeId }) => {
         await axios.post("http://localhost:3001/api/create-otsikko", {
           text: otsikkoText,
           runko_id: nimikeId,
-        });
+        }, { withCredentials: true });
       } else {
         await axios.put(
           `http://localhost:3001/api/update-otsikko/${otsikkoId}`,
           {
             text: otsikkoText,
-          },
+          }, { withCredentials: true }
         );
 
         setEditingOtsikkoId(null);
@@ -101,7 +103,7 @@ const Otsikko = ({ nimikeId }) => {
   const handleDeleteOtsikko = async (otsikkoId) => {
     try {
       await axios.delete(
-        `http://localhost:3001/api/delete-otsikko/${otsikkoId}`,
+        `http://localhost:3001/api/delete-otsikko/${otsikkoId}`, { withCredentials: true },
       );
 
       fetchOtsikkoData();
@@ -127,7 +129,7 @@ const Otsikko = ({ nimikeId }) => {
   const fetchKenttaContent = async (otsikkoId) => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/get-kentta-content/${otsikkoId}`,
+        `http://localhost:3001/api/get-kentta-content/${otsikkoId}`, { withCredentials: true },
       );
       return response.data.kentta;
     } catch (error) {

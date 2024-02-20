@@ -30,7 +30,7 @@ const OtsikkoEditor = () => {
   const fetchOtsikkoData = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/get-otsikko/${id}`,
+        `http://localhost:3001/api/get-otsikko/${id}`, { withCredentials: true }
       );
       setOtsikkoData(response.data);
 
@@ -60,7 +60,7 @@ const OtsikkoEditor = () => {
 
       await axios.put(
         "http://localhost:3001/api/update-otsikko-order",
-        newData,
+        newData, { withCredentials: true }
       );
 
       console.log("Order updated successfully");
@@ -85,7 +85,7 @@ const OtsikkoEditor = () => {
   const fetchKenttaContent = async (otsikkoId) => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/get-kentta-content/${otsikkoId}`,
+        `http://localhost:3001/api/get-kentta-content/${otsikkoId}`, { withCredentials: true }
       );
       return response.data.kentta;
     } catch (error) {
@@ -100,7 +100,7 @@ const OtsikkoEditor = () => {
 
       await axios.put(`http://localhost:3001/api/update-otsikko/${otsikkoId}`, {
         otsikko: otsikkoTexts[index],
-      });
+      }, { withCredentials: true });
       fetchOtsikkoData();
 
       setIsEditing(false);
@@ -134,7 +134,7 @@ const OtsikkoEditor = () => {
 
     try {
       await axios.delete(
-        `http://localhost:3001/api/delete-otsikko/${otsikkoId}`,
+        `http://localhost:3001/api/delete-otsikko/${otsikkoId}`, { withCredentials: true }
       );
 
       fetchOtsikkoData();
@@ -151,13 +151,13 @@ const OtsikkoEditor = () => {
         await axios.post("http://localhost:3001/api/create-otsikko", {
           text: otsikkoText,
           runko_id: id,
-        });
+        }, { withCredentials: true });
       } else {
         await axios.put(
           `http://localhost:3001/api/update-otsikko/${otsikkoId}`,
           {
             text: otsikkoText,
-          },
+          }, { withCredentials: true }
         );
 
         setEditingOtsikkoId(null);
@@ -239,9 +239,8 @@ const OtsikkoEditor = () => {
                               handleOtsikkoClick(otsikko.id);
                             }
                           }}
-                          className={`otsikko-item ${
-                            selectedOtsikkoId === otsikko.id ? "selected" : ""
-                          }`}
+                          className={`otsikko-item ${selectedOtsikkoId === otsikko.id ? "selected" : ""
+                            }`}
                         >
                           <div>
                             {isEditing[index] ? (

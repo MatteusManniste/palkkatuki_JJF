@@ -42,7 +42,7 @@ const TextEditor = ({ otsikkoId, kenttaContent }) => {
         `http://localhost:3001/api/save-rich-text/${otsikkoId}`,
         {
           richText,
-        },
+        }, { withCredentials: true }
       );
       console.log("Rich text content saved successfully");
     } catch (error) {

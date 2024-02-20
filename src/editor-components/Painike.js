@@ -12,7 +12,7 @@ const createPainike = async (sisaltoId, nimi, destinationId) => {
         sisaltoId,
         nimi,
         destinationId,
-      },
+      }, { withCredentials: true }
     );
 
     const newPainike = response.data;
@@ -33,7 +33,7 @@ const editPainike = async (painikeId, nimi, destinationId) => {
       {
         nimi,
         destinationId,
-      },
+      }, { withCredentials: true }
     );
 
     const updatedPainike = response.data;
@@ -62,7 +62,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   const fetchSisaltoOptions = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3001/api/get-sisalto-options",
+        "http://localhost:3001/api/get-sisalto-options", { withCredentials: true }
       );
       const sisaltoOptionsData = response.data;
 
@@ -93,7 +93,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   const fetchExistingPainikes = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/painike/${otsikkoId}`,
+        `http://localhost:3001/api/painike/${otsikkoId}`, { withCredentials: true }
       );
       const existingPainikes = response.data;
 
@@ -168,7 +168,7 @@ const Painike = ({ otsikkoId, onPainikeUpdated }) => {
   const handleDeleteClick = async (painikeId) => {
     try {
       await axios.delete(
-        `http://localhost:3001/api/delete-painike/${painikeId}`,
+        `http://localhost:3001/api/delete-painike/${painikeId}`, { withCredentials: true }
       );
 
       const updatedPainikesArray = createdPainikes.filter(
