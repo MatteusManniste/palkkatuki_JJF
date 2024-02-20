@@ -151,7 +151,7 @@ async function insertAnswerOption(optionText, questionIndex, optionIndex) {
 async function fetchAndInsertQuestionsAndAnswersFromExcel() {
   try {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile("matrix.xlsx");
+    await workbook.xlsx.readFile(`${__dirname}/matrix.xlsx`);
     const worksheet = workbook.getWorksheet(1);
 
     for (
@@ -209,7 +209,7 @@ async function createMatrixColumns(questions, answers) {
 async function insertMatrixDataFromExcel(questions, answers) {
   try {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile("matrix.xlsx");
+    await workbook.xlsx.readFile(`${__dirname}/matrix.xlsx`);
     const worksheet = workbook.getWorksheet(2);
 
     const insertPromises = [];
@@ -269,7 +269,8 @@ async function Mörönheräys() {
     let worksheet;
 
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile("matrix.xlsx");
+    console.log(__dirname);
+    await workbook.xlsx.readFile(`${__dirname}/matrix.xlsx`);
     worksheet = workbook.getWorksheet(2);
 
     worksheet.getRow(1).eachCell((cell) => {
