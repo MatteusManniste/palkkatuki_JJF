@@ -45,6 +45,16 @@ const middleware = (req, res, next) => {
     // if verification went through, we can set this to quickly get our auth status in subsequent requests.
     req.isAuth = true;
 
+    // refresh cookie and token
+    const jwtPayload = {};
+    const refreshedToken = jwt.sign(jwtPayload, process.env.JWT_SECRET, { expiresIn: "2h" });
+
+    res.cookie("token", refreshedToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" ? true : false,
+      maxAge: 2 * 60 * 60 * 1000, // 2 hours in milliseconds
+    });
+
     next();
   } catch (error) {
     // errors here are either that the token didn't exist, was invalid, or expired. 
@@ -87,7 +97,7 @@ app.post("/api/login", (req, res) => {
           res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production" ? true : false,
-            maxAge: new Date(Date.now() + 7200 * 1000), // 2 hours in milliseconds
+            maxAge: 2 * 60 * 60 * 1000, // 2 hours in milliseconds
           });
 
           console.log("Successfully logged in");
