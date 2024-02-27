@@ -15,8 +15,10 @@ function App() {
       <div className="app-container">
         <Router>
           <div className="container-header">
-            <div className="logo-nav"></div>
-            <Apua />
+            <div className="logo-nav">
+              <img className="logo" src="./yrityssalo-logo.png" alt="yrityssalo logo"></img>
+              <Apua />
+            </div>
           </div>
 
           <div className="container-content">

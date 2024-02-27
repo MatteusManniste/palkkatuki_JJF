@@ -4,7 +4,7 @@ import { AuthData } from "./backend/AuthWrapper";
 const AppLinks = () => {
   const auth = AuthData();
 
-  const privateLinks = [{ path: "/hallintapaneeli", name: "Hallintapaneeli" }];
+  const privateLinks = [{ path: "/hallintapaneeli", name: "Hallintapaneeli" }, { path: "/upload", name: "Päivitä matriisi" }];
 
   return (
     <ul>

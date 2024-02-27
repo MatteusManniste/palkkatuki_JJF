@@ -7,6 +7,7 @@ import Editor from "./Editor";
 import Sivu from "./Sivu";
 import SivuEditor from "./SivuEditor";
 import { AuthData } from "./backend/AuthWrapper";
+import Upload from "./Upload";
 
 const AppRoutes = () => {
   const auth = AuthData();
@@ -14,7 +15,8 @@ const AppRoutes = () => {
   const privateRoutes = [
     { path: "/hallintapaneeli", element: <Hallintapaneeli /> },
     { path: "/editor", element: <Editor /> },
-    { path: "/sivueditor/:id", element: <SivuEditor /> }
+    { path: "/sivueditor/:id", element: <SivuEditor /> },
+    { path: "/upload", element: <Upload /> }
   ];
 
   const NotFound = () => <h1>404 - Not Found</h1>;
