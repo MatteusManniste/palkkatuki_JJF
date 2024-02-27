@@ -148,10 +148,10 @@ async function insertAnswerOption(optionText, questionIndex, optionIndex) {
   }
 }
 
-async function fetchAndInsertQuestionsAndAnswersFromExcel() {
+async function fetchAndInsertQuestionsAndAnswersFromExcel(file) {
   try {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(`${__dirname}/matrix.xlsx`);
+    await workbook.xlsx.load(file);
     const worksheet = workbook.getWorksheet(1);
 
     for (
@@ -206,10 +206,10 @@ async function createMatrixColumns(questions, answers) {
   return newEntries;
 }
 
-async function insertMatrixDataFromExcel(questions, answers) {
+async function insertMatrixDataFromExcel(file, questions, answers) {
   try {
     const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.readFile(`${__dirname}/matrix.xlsx`);
+    await workbook.xlsx.load(file);
     const worksheet = workbook.getWorksheet(2);
 
     const insertPromises = [];
@@ -261,7 +261,7 @@ async function insertMatrixDataFromExcel(questions, answers) {
   }
 }
 
-async function Mörönheräys() {
+async function uploadMatrix(file) {
   try {
     const questions = [];
     const answers = [];
@@ -269,8 +269,7 @@ async function Mörönheräys() {
     let worksheet;
 
     const workbook = new ExcelJS.Workbook();
-    console.log(__dirname);
-    await workbook.xlsx.readFile(`${__dirname}/matrix.xlsx`);
+    await workbook.xlsx.load(file);
     worksheet = workbook.getWorksheet(2);
 
     worksheet.getRow(1).eachCell((cell) => {
@@ -290,15 +289,15 @@ async function Mörönheräys() {
     console.log(questions);
     console.log(answers);
     insertQuestionsAndAnswersIntoQuestionsTable(questions, answers);
-    fetchAndInsertQuestionsAndAnswersFromExcel();
+    fetchAndInsertQuestionsAndAnswersFromExcel(file);
     await createMatrixColumns(questions, answers);
-    insertMatrixDataFromExcel(questions, answers);
+    insertMatrixDataFromExcel(file, questions, answers);
+    return true;
   } catch (error) {
-    console.error("Virhe Mörönheräyksen aikana:", error);
+    console.error("Virhe Matriisin tietokantaan lähetyksen aikana:", error);
+    return false;
   }
 }
-
-Mörönheräys();
 
 const getUser = (username, callback) => {
   const sql = "SELECT * FROM user WHERE username = ?";
@@ -700,4 +699,5 @@ module.exports = {
   SelectFromQuestionsAnswers,
   SelectAllAnswers,
   ExecuteMatrixQuery,
+  uploadMatrix
 };

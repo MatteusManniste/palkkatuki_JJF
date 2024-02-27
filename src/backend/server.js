@@ -2,16 +2,17 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const express = require("express");
 const cors = require("cors");
-const multer = require("multer");
 const app = express();
 const port = process.env.PORT || 3001;
 const Data = require("./data");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
 
 app.use(cookieParser());
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -20,6 +21,19 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+const storage = multer.memoryStorage();
+const fileFilter = (req, file, cb) => {
+  // Check file type
+  if (file.mimetype === "application/vnd.ms-excel" || file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type. Only Excel files are allowed."), false);
+  }
+};
+
+// Initialize multer with storage and file filter
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 const middleware = (req, res, next) => {
   try {
@@ -240,6 +254,24 @@ app.get("/api/authStatus", (req, res) => {
   } catch (error) {
     console.error("Error while checking authStatus:", error.message);
     res.status(500).json({ error: "Internal error", isAuth: false });
+  }
+});
+
+app.post("/api/upload", upload.single("file"), async (req, res) => {
+  try {
+    const file = req.file.buffer;
+    const buffer = Buffer.from(file, "base64");
+
+    if (await Data.uploadMatrix(buffer)) {
+      console.log("Successfully uploaded matrix");
+      res.json({ message: "Successfully uploaded matrix" });
+      return;
+    }
+
+    console.log("Could not upload the given file");
+    res.status(400).json({ error: "Could not upload the given file" });
+  } catch (error) {
+    res.status(500).json({ error: "Internal error" });
   }
 });
 
@@ -480,27 +512,27 @@ app.delete("/api/delete-painike/:id", (req, res) => {
   });
 });
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads/");
+//   },
+//   filename: (req, file, cb) => {
+//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+//     cb(null, uniqueSuffix + path.extname(file.originalname));
+//   },
+// });
 
-const upload = multer({ storage });
+// const upload = multer({ storage });
 
-app.post("/api/upload-image", upload.single("image"), (req, res) => {
-  try {
-    const imageUrl = `http://localhost:${port}/${req.file.path}`;
-    res.json({ url: imageUrl });
-  } catch (error) {
-    console.error("Virhe kuvan lataamisessa:", error);
-    res.status(500).json({ error: "Kuvan lataus epäonnistui" });
-  }
-});
+// app.post("/api/upload-image", upload.single("image"), (req, res) => {
+//   try {
+//     const imageUrl = `http://localhost:${port}/${req.file.path}`;
+//     res.json({ url: imageUrl });
+//   } catch (error) {
+//     console.error("Virhe kuvan lataamisessa:", error);
+//     res.status(500).json({ error: "Kuvan lataus epäonnistui" });
+//   }
+// });
 
 app.listen(port, () => {
   console.log(`Palvelin on käynnissä portissa ${port}`);
