@@ -39,17 +39,16 @@ const middleware = (req, res, next) => {
   try {
     const token = req.cookies.token;
 
-    // this method throws errors if logins are invalid.
+    // this method throws errors if the token is invalid or expired.
     jwt.verify(token, process.env.JWT_SECRET);
 
     // if verification went through, we can set this to quickly get our auth status in subsequent requests.
     req.isAuth = true;
 
-    // no errors means that the token was created by us, allow this request.
     next();
   } catch (error) {
     // errors here are either that the token didn't exist, was invalid, or expired. 
-    // either way, let's clear it to force the user to login again.
+    // either way, let's clear the cookie to force the user to login again.
     console.error("Auth failed:", error.message);
     req.isAuth = false;
     res.clearCookie("token");
