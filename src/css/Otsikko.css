@@ -1,30 +1,30 @@
 .hidden {
-    display: none;
+  display: none;
 }
 
 .otsikko-view {
-    display: flex;
-    align-items: center;
-  }
-  
-  .otsikko-view h3 {
-    font-size: 1.5rem;
-  }
-  
-  .button-icon {
-    margin-left: 10px;
-    color: #A5CE3A;
-    cursor: pointer;
-  }
-  
-  .otsikko-view .edit-button .fas,
-  .otsikko-view .delete-button .fas {
-    margin-right: 4px;
-  }
+  display: flex;
+  align-items: center;
+}
+
+.otsikko-view h3 {
+  font-size: 1.5rem;
+}
+
+.button-icon {
+  margin-left: 10px;
+  color: #a5ce3a;
+  cursor: pointer;
+}
+
+.otsikko-view .edit-button .fas,
+.otsikko-view .delete-button .fas {
+  margin-right: 4px;
+}
 
 .otsikko-submit-button {
-  background-color: #A5CE3A;
-  color: #FFF;
+  background-color: #92b92f;
+  color: #fff;
   padding: 10px 20px;
   border: none;
   cursor: pointer;
@@ -33,14 +33,14 @@
 }
 
 .otsikko-submit-button:hover {
-  background-color: #8CAF26;
+  background-color: #8caf26;
 }
 
 ul.custom-list {
   display: inline-block;
-  margin: 0;             
-  padding: 0;            
-  list-style-type: none
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
 }
 
 .container {
@@ -57,9 +57,9 @@ ul.custom-list {
     flex-direction: column;
   }
 
-  .custom-list, .centered-content {
+  .custom-list,
+  .centered-content {
     flex: auto;
     margin: 0;
-
   }
 }
