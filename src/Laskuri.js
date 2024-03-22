@@ -146,14 +146,19 @@ const Laskuri = () => {
                     const id = field.split("_")[1];
                     const correspondingText = vastausDataObject[id] || "";
                     return (
-                      <div key={index} className="result-text">
-                        {correspondingText && `${correspondingText}: `}
-                        {text.match(/^\d*\.?\d+$/)
-                          ? text.includes(".")
-                            ? `${parseFloat(text) * 100}%`
-                            : `${text} €`
-                          : text}
-                      </div>
+                      <>
+                        {correspondingText.toLowerCase().includes("huom!") && <br />}
+                        <div key={index} className="result-label">
+                          {correspondingText && `${correspondingText}: `}
+                          <span className="result-text">
+                            {text.match(/^\d*\.?\d+$/)
+                              ? text.includes(".")
+                                ? `${parseFloat(text) * 100}%`
+                                : `${text} €`
+                              : text}
+                          </span>
+                        </div>
+                      </>
                     );
                   }
                   return null;
